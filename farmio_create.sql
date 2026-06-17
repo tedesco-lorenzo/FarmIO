@@ -244,3 +244,9 @@ CREATE TABLE ORDINE (
     FOREIGN KEY (id_cliente) REFERENCES CLIENTE(id_cliente),
     FOREIGN KEY (email_azienda_agricola, partita_iva_punto_vendita) REFERENCES PUNTO_VENDITA(email_azienda_agricola, partita_iva)
 );
+
+
+
+ALTER TABLE `azienda_agricola_db`.`risorsa_materiale` 
+CHANGE COLUMN `macchina_agricola` `macchina_agricola` TINYINT(4) NOT NULL ,
+CHANGE COLUMN `attrezzatura` `attrezzatura` TINYINT(4) NOT NULL ;
