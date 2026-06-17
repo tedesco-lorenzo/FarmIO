@@ -1,4 +1,4 @@
-USE azienda_agricola_db;
+USE farmio;
 
 -- 1. AZIENDA AGRICOLA
 INSERT INTO AZIENDA_AGRICOLA VALUES 

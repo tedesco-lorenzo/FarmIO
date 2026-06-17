@@ -1,7 +1,14 @@
 from flask import Flask, redirect, render_template, request, session, url_for
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 
 app = Flask(__name__)
 app.secret_key = "farmio-dev-secret-key"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root@localhost:3306/farmio?charset=utf8mb4"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
+
+db = SQLAlchemy(app)
 
 PUBLIC_ENDPOINTS = {"login", "register", "forgot_password", "logout", "static"}
 TEMP_USERS = {
@@ -12,6 +19,15 @@ TEMP_USERS = {
         "role": "admin",
     }
 }
+
+
+def test_database_connection():
+    try:
+        with app.app_context():
+            db.session.execute(text("SELECT 1"))
+        return True, None
+    except Exception as exc:
+        return False, str(exc)
 
 
 def normalize_email(value):
@@ -832,4 +848,9 @@ def not_found(_error):
     return render_template("404.html"), 404
 
 if __name__ == "__main__":
+    db_connected, db_error = test_database_connection()
+    if db_connected:
+        print("Connessione MySQL attiva.")
+    else:
+        print(f"Connessione MySQL non riuscita: {db_error}")
     app.run(debug=True)

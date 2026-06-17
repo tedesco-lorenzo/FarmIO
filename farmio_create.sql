@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS azienda_agricola_db;
-USE azienda_agricola_db;
+CREATE DATABASE IF NOT EXISTS farmio;
+USE farmio;
 
 -- 1. AZIENDA AGRICOLA
 CREATE TABLE AZIENDA_AGRICOLA (
