@@ -344,25 +344,25 @@ def get_plot_history(plot_id, history_type):
         "raccolta": "Raccolta",
     }
     columns_map = {
-        "trattamenti": ["Data", "Qtà acqua", "Prodotto", "Qtà prodotto", "ID app."],
-        "irrigazione": ["Data", "Ora inizio", "Prodotto", "Qtà prodotto", "ID app."],
-        "raccolta": ["Data", "Qtà raccolta", "Anno scorta", "Email", "ID app.", "Varietà", "Specie"],
+        "trattamenti": ["Data", "Qtà acqua", "Prodotto", "Qtà prodotto"],
+        "irrigazione": ["Data", "Ora inizio", "Prodotto", "Qtà prodotto"],
+        "raccolta": ["Data", "Qtà raccolta", "Anno scorta", "Email", "Varietà", "Specie"],
     }
     rows_map = {
         "trattamenti": [
-            ["00/00/0000", "0", "Prodotto 1", "0", str(plot_id)],
-            ["00/00/0000", "0", "Prodotto 2", "0", str(plot_id)],
-            ["00/00/0000", "0", "Prodotto 3", "0", str(plot_id)],
+            ["00/00/0000", "0", "Prodotto 1", "0"],
+            ["00/00/0000", "0", "Prodotto 2", "0"],
+            ["00/00/0000", "0", "Prodotto 3", "0"],
         ],
         "irrigazione": [
-            ["00/00/0000", "00:00", "Prodotto 1", "0", str(plot_id)],
-            ["00/00/0000", "00:00", "Prodotto 2", "0", str(plot_id)],
-            ["00/00/0000", "00:00", "Prodotto 3", "0", str(plot_id)],
+            ["00/00/0000", "00:00", "Prodotto 1", "0"],
+            ["00/00/0000", "00:00", "Prodotto 2", "0"],
+            ["00/00/0000", "00:00", "Prodotto 3", "0"],
         ],
         "raccolta": [
-            ["00/00/0000", "0", "0000", "azienda1@farmio.local", str(plot_id), "Varieta 1", "Specie 1"],
-            ["00/00/0000", "0", "0000", "azienda2@farmio.local", str(plot_id), "Varieta 2", "Specie 2"],
-            ["00/00/0000", "0", "0000", "azienda3@farmio.local", str(plot_id), "Varieta 3", "Specie 3"],
+            ["00/00/0000", "0", "0000", "azienda1@farmio.local", "Varieta 1", "Specie 1"],
+            ["00/00/0000", "0", "0000", "azienda2@farmio.local", "Varieta 2", "Specie 2"],
+            ["00/00/0000", "0", "0000", "azienda3@farmio.local", "Varieta 3", "Specie 3"],
         ],
     }
     if history_type not in labels:
