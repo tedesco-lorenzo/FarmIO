@@ -1,0 +1,122 @@
+<!-- Sidebar -->
+<ul class="navbar-nav bg-gradient-success sidebar sidebar-dark accordion" id="accordionSidebar">
+
+    <!-- Brand -->
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ url_for('home') }}">
+        <div class="sidebar-brand-icon rotate-n-15">
+            <i class="fas fa-seedling"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">FarmIO</div>
+    </a>
+
+    <hr class="sidebar-divider my-0">
+
+    <!-- Dashboard -->
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('home') }}">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-heading">
+        Gestione
+    </div>
+
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseProprieta"
+            aria-expanded="true" aria-controls="collapseProprieta">
+            <i class="fas fa-building"></i>
+            <span>Proprietà</span>
+        </a>
+        <div id="collapseProprieta" class="collapse" aria-labelledby="headingProprieta" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Proprietà:</h6>
+                <a class="collapse-item" href="{{ url_for('proprieta_stabilimenti') }}">Stabilimenti</a>
+                <a class="collapse-item" href="{{ url_for('proprieta_terreni') }}">Terreni</a>
+            </div>
+        </div>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseRisorseMateriali"
+            aria-expanded="true" aria-controls="collapseRisorseMateriali">
+            <i class="fas fa-boxes"></i>
+            <span>Risorse Materiali</span>
+        </a>
+        <div id="collapseRisorseMateriali" class="collapse" aria-labelledby="headingRisorseMateriali" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Risorse Materiali:</h6>
+                <a class="collapse-item" href="{{ url_for('risorse_attrezzature') }}">Attrezzature</a>
+                <a class="collapse-item" href="{{ url_for('risorse_macchinari') }}">Macchinari</a>
+            </div>
+        </div>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePuntoVendita"
+            aria-expanded="true" aria-controls="collapsePuntoVendita">
+            <i class="fas fa-store"></i>
+            <span>Punto Vendita</span>
+        </a>
+        <div id="collapsePuntoVendita" class="collapse" aria-labelledby="headingPuntoVendita" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Punto Vendita:</h6>
+                <a class="collapse-item" href="{{ url_for('punto_vendita_online') }}">Online</a>
+                <a class="collapse-item" href="{{ url_for('punto_vendita_fisico') }}">Fisico</a>
+            </div>
+        </div>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('soggetto') }}">
+            <i class="fas fa-user"></i>
+            <span>Soggetto</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('scorte') }}">
+            <i class="fas fa-warehouse"></i>
+            <span>Scorte</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('appezzamenti') }}">
+            <i class="fas fa-map-marked-alt"></i>
+            <span>Appezzamenti</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('interventi_operativi') }}">
+            <i class="fas fa-tools"></i>
+            <span>Interventi Operativi</span>
+        </a>
+    </li>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-heading">
+        Account
+    </div>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('logout') }}">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Disconnetti</span>
+        </a>
+    </li>
+
+    <hr class="sidebar-divider d-none d-md-block">
+
+    <!-- Sidebar Toggler (Sidebar) -->
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+
+</ul>
+<!-- End Sidebar -->

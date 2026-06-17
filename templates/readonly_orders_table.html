@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+<div id="wrapper">
+    {% include "partials/_sidebar.html" %}
+
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <h4 class="m-0 text-gray-800">{{ title }}</h4>
+            </nav>
+
+            <div class="container-fluid">
+                {% include "partials/_page_navigation.html" %}
+                <div class="mb-4">
+                    <h1 class="h3 mb-1 text-gray-800">{{ title }}</h1>
+                    <p class="mb-0 text-muted">{{ subtitle }}</p>
+                </div>
+
+                <div class="card shadow mb-4 farmio-card">
+                    <div class="card-header py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-success">Ordini clienti</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle farmio-data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Cliente</th>
+                                        {% if show_online_fields %}
+                                        <th>Indirizzo</th>
+                                        {% endif %}
+                                        <th>P. IVA</th>
+                                        <th>Data</th>
+                                        <th>Totale</th>
+                                        <th>Email</th>
+                                        <th class="text-center">Dettaglio</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders %}
+                                    <tr>
+                                        <td>
+                                            <a class="font-weight-bold text-success" href="{{ url_for(detail_endpoint, client_id=order.client_id) }}">
+                                                {{ order.client_name }} {{ order.client_surname }}
+                                            </a>
+                                        </td>
+                                        {% if show_online_fields %}
+                                        <td>{{ order.client_address }}</td>
+                                        {% endif %}
+                                        <td>{{ order.client_vat or '-' }}</td>
+                                        <td>{{ order.date }}</td>
+                                        <td>{{ order.total }}</td>
+                                        <td>{{ order.company_email }}</td>
+                                        <td class="text-center">
+                                            <a class="btn btn-sm btn-outline-success" href="{{ url_for(order_detail_endpoint, order_id=order.order_id) }}">
+                                                Apri
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>FarmIO © 2026 by Compagnia del Grifone SRL</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
+{% endblock %}

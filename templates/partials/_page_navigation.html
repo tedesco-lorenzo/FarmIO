@@ -1,0 +1,57 @@
+{% set endpoint = request.endpoint %}
+{% set parent_label = none %}
+{% set parent_url = none %}
+
+{% if endpoint in ["proprieta_stabilimenti", "proprieta_terreni"] %}
+    {% set parent_label = "Proprietà" %}
+    {% set parent_url = url_for("proprieta") %}
+{% elif endpoint in ["soggetto_dipendenti", "soggetto_aziende_esterne"] %}
+    {% set parent_label = "Soggetto" %}
+    {% set parent_url = url_for("soggetto") %}
+{% elif endpoint == "soggetto_dipendente_ore" %}
+    {% set parent_label = "Soggetto" %}
+    {% set parent_url = url_for("soggetto") %}
+{% elif endpoint in ["risorse_attrezzature", "risorse_macchinari"] %}
+    {% set parent_label = "Risorse Materiali" %}
+    {% set parent_url = url_for("risorse_materiali") %}
+{% elif endpoint in ["punto_vendita_online", "punto_vendita_fisico"] %}
+    {% set parent_label = "Punto Vendita" %}
+    {% set parent_url = url_for("punto_vendita") %}
+{% elif endpoint == "punto_vendita_online_cliente" %}
+    {% set parent_label = "Ordini Online" %}
+    {% set parent_url = url_for("punto_vendita_online") %}
+{% elif endpoint == "punto_vendita_fisico_cliente" %}
+    {% set parent_label = "Ordini Fisico" %}
+    {% set parent_url = url_for("punto_vendita_fisico") %}
+{% elif endpoint == "punto_vendita_online_ordine" %}
+    {% set parent_label = "Ordini Online" %}
+    {% set parent_url = url_for("punto_vendita_online") %}
+{% elif endpoint == "punto_vendita_fisico_ordine" %}
+    {% set parent_label = "Ordini Fisico" %}
+    {% set parent_url = url_for("punto_vendita_fisico") %}
+{% elif endpoint in ["appezzamento_trattamenti", "appezzamento_irrigazione", "appezzamento_raccolta"] %}
+    {% set parent_label = "Appezzamenti" %}
+    {% set parent_url = url_for("appezzamenti") %}
+{% endif %}
+
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-3">
+    <nav aria-label="breadcrumb" class="mb-2 mb-md-0">
+        <ol class="breadcrumb bg-white px-0 py-0 mb-0 small">
+            <li class="breadcrumb-item"><a href="{{ url_for('home') }}">Dashboard</a></li>
+            {% if parent_label and parent_url %}
+            <li class="breadcrumb-item"><a href="{{ parent_url }}">{{ parent_label }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+        </ol>
+    </nav>
+    <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-outline-secondary mr-2" onclick="window.history.back()">
+            <i class="fas fa-arrow-left fa-sm mr-1"></i>
+            Indietro
+        </button>
+        <a class="btn btn-sm btn-outline-success" href="{{ url_for('home') }}">
+            <i class="fas fa-home fa-sm mr-1"></i>
+            Dashboard
+        </a>
+    </div>
+</div>

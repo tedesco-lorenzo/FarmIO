@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.table-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.delete-row-button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e74a3b;
+    color: #e74a3b;
+    background: #fff;
+    border-radius: 0.35rem;
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.delete-row-button:hover {
+    background: #e74a3b;
+    color: #fff;
+}
+
+.subject-boolean-select {
+    min-width: 108px;
+}
+
+.subject-disabled-link,
+.subject-disabled-link:hover {
+    opacity: 0.6;
+    pointer-events: none;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div id="wrapper">
+    {% include "partials/_sidebar.html" %}
+
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <h4 class="m-0 text-gray-800">{{ title }}</h4>
+            </nav>
+
+            <div class="container-fluid">
+                {% include "partials/_page_navigation.html" %}
+                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                    <div>
+                        <h1 class="h3 mb-1 text-gray-800">{{ title }}</h1>
+                        <p class="mb-0 text-muted">{{ subtitle }}</p>
+                    </div>
+                    <div class="farmio-edit-controls">
+                        <button class="btn btn-outline-success shadow-sm" type="button" data-lock-table="{{ table_id }}">
+                            <i class="fas fa-check fa-sm mr-1"></i>
+                            Conferma tabella
+                        </button>
+                        <button class="btn btn-outline-warning shadow-sm d-none" type="button" data-unlock-table="{{ table_id }}">
+                            <i class="fas fa-pen fa-sm mr-1"></i>
+                            Modifica tabella
+                        </button>
+                        <button class="btn btn-success shadow-sm" type="button" data-add-subject-row="{{ table_id }}">
+                            <i class="fas fa-plus fa-sm text-white-50 mr-1"></i>
+                            Aggiungi riga
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card shadow mb-4 farmio-card">
+                    <div class="card-header py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-success">Elenco soggetti</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle farmio-data-table" id="{{ table_id }}" data-row-count="{{ subjects|length }}" data-empty-colspan="13">
+                                <thead>
+                                    <tr>
+                                        <th>Paga oraria</th>
+                                        <th>Tipo</th>
+                                        <th>Ragione sociale</th>
+                                        <th>P. IVA</th>
+                                        <th>Nome</th>
+                                        <th>Cognome</th>
+                                        <th>Nascita</th>
+                                        <th>IBAN</th>
+                                        <th>Cod. fiscale</th>
+                                        <th>Manager</th>
+                                        <th>Email</th>
+                                        <th class="text-center">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for subject in subjects %}
+                                    <tr>
+                                        <td><input type="text" class="form-control" value="{{ subject.hourly_pay }}"></td>
+                                        <td>
+                                            <select class="form-control subject-boolean-select" data-subject-type>
+                                                <option value="Dipendente" {% if subject.external_company == "Dipendente" %}selected{% endif %}>Dipendente</option>
+                                                <option value="Azienda esterna" {% if subject.external_company == "Azienda esterna" %}selected{% endif %}>Azienda esterna</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="text" class="form-control {% if subject.external_company == 'Dipendente' %}bg-light{% endif %}" value="{{ subject.company_name }}" {% if subject.external_company == "Dipendente" %}disabled{% endif %}></td>
+                                        <td><input type="text" class="form-control" value="{{ subject.vat_number }}"></td>
+                                        <td><input type="text" class="form-control" value="{{ subject.name }}"></td>
+                                        <td><input type="text" class="form-control" value="{{ subject.surname }}"></td>
+                                        <td><input type="text" class="form-control" value="{{ subject.birth_date }}"></td>
+                                        <td><input type="text" class="form-control" value="{{ subject.iban }}"></td>
+                                        <td><input type="text" class="form-control" value="{{ subject.tax_code }}"></td>
+                                        <td>
+                                            <select class="form-control subject-boolean-select" data-manager-select>
+                                                <option value="No" {% if subject.manager == "No" %}selected{% endif %}>No</option>
+                                                <option value="Sì" {% if subject.manager == "Sì" %}selected{% endif %}>Sì</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="text" class="form-control" value="{{ subject.email }}"></td>
+                                        <td class="text-center">
+                                            <div class="table-actions">
+                                                <button type="button" class="delete-row-button" data-remove-subject-row title="Rimuovi riga" aria-label="Rimuovi riga">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                                <a class="btn btn-sm btn-outline-success" data-hours-link href="{{ url_for('soggetto_dipendente_ore', employee_id=subject.id) }}">
+                                                    Totale ore
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>FarmIO © 2026 by Compagnia del Grifone SRL</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    function createInputCell(placeholderText) {
+        var cell = document.createElement("td");
+        var input = document.createElement("input");
+        input.type = "text";
+        input.className = "form-control";
+        input.placeholder = placeholderText;
+        cell.appendChild(input);
+        return cell;
+    }
+
+    function createBooleanCell(isManagerField) {
+        var cell = document.createElement("td");
+        var select = document.createElement("select");
+        select.className = "form-control subject-boolean-select";
+        if (isManagerField) {
+            select.setAttribute("data-manager-select", "");
+        } else {
+            select.setAttribute("data-subject-type", "");
+        }
+        if (isManagerField) {
+            var optionNo = document.createElement("option");
+            optionNo.value = "No";
+            optionNo.textContent = "No";
+
+            var optionYes = document.createElement("option");
+            optionYes.value = "Sì";
+            optionYes.textContent = "Sì";
+
+            select.appendChild(optionNo);
+            select.appendChild(optionYes);
+        } else {
+            var employeeOption = document.createElement("option");
+            employeeOption.value = "Dipendente";
+            employeeOption.textContent = "Dipendente";
+
+            var externalOption = document.createElement("option");
+            externalOption.value = "Azienda esterna";
+            externalOption.textContent = "Azienda esterna";
+
+            select.appendChild(employeeOption);
+            select.appendChild(externalOption);
+        }
+        cell.appendChild(select);
+        return cell;
+    }
+
+    function createActionCell(rowNumber) {
+        var cell = document.createElement("td");
+        cell.className = "text-center";
+        var actions = document.createElement("div");
+        actions.className = "table-actions";
+
+        var removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.className = "delete-row-button";
+        removeButton.title = "Rimuovi riga";
+        removeButton.setAttribute("aria-label", "Rimuovi riga");
+        removeButton.setAttribute("data-remove-subject-row", "");
+        removeButton.innerHTML = '<i class="fas fa-times"></i>';
+        actions.appendChild(removeButton);
+
+        var hoursLink = document.createElement("a");
+        hoursLink.className = "btn btn-sm btn-outline-success";
+        hoursLink.href = "/soggetto/dipendenti/ore/" + rowNumber;
+        hoursLink.textContent = "Totale ore";
+        hoursLink.setAttribute("data-hours-link", "");
+        actions.appendChild(hoursLink);
+
+        cell.appendChild(actions);
+        return cell;
+    }
+
+    function createEmptyStateRow(table) {
+        var row = document.createElement("tr");
+        row.className = "empty-state";
+
+        var cell = document.createElement("td");
+        cell.colSpan = Number(table.dataset.emptyColspan || "1");
+        cell.className = "text-center text-muted py-4";
+        cell.textContent = 'Nessun soggetto inserito. Usa "Aggiungi riga" per iniziare.';
+
+        row.appendChild(cell);
+        return row;
+    }
+
+    function syncManagerRule(row) {
+        var subjectTypeSelect = row.querySelector("[data-subject-type]");
+        var managerSelect = row.querySelector("[data-manager-select]");
+        var hoursLink = row.querySelector("[data-hours-link]");
+        var companyNameInput = row.children[2] ? row.children[2].querySelector("input") : null;
+        if (!subjectTypeSelect || !managerSelect) {
+            return;
+        }
+
+        var isExternal = subjectTypeSelect.value === "Azienda esterna";
+        if (isExternal) {
+            managerSelect.value = "No";
+            managerSelect.disabled = true;
+            managerSelect.classList.add("bg-light");
+        } else {
+            managerSelect.disabled = false;
+            managerSelect.classList.remove("bg-light");
+        }
+
+        if (companyNameInput) {
+            companyNameInput.disabled = !isExternal;
+            companyNameInput.classList.toggle("bg-light", !isExternal);
+            if (!isExternal) {
+                companyNameInput.value = "";
+            }
+        }
+
+        if (hoursLink) {
+            hoursLink.classList.toggle("subject-disabled-link", isExternal);
+            hoursLink.classList.toggle("disabled", isExternal);
+            hoursLink.setAttribute("aria-disabled", isExternal ? "true" : "false");
+        }
+    }
+
+    function bindSubjectRow(row) {
+        syncManagerRule(row);
+        var subjectTypeSelect = row.querySelector("[data-subject-type]");
+        if (subjectTypeSelect) {
+            subjectTypeSelect.addEventListener("change", function () {
+                syncManagerRule(row);
+            });
+        }
+    }
+
+    document.querySelectorAll("#{{ table_id }} tbody tr").forEach(function (row) {
+        bindSubjectRow(row);
+    });
+
+    document.querySelectorAll("[data-add-subject-row]").forEach(function (button) {
+        button.addEventListener("click", function () {
+            var table = document.getElementById(button.dataset.addSubjectRow);
+            if (!table) {
+                return;
+            }
+
+            var tbody = table.querySelector("tbody");
+            var emptyState = tbody.querySelector(".empty-state");
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            var rowNumber = Number(table.dataset.rowCount || "0") + 1;
+            table.dataset.rowCount = String(rowNumber);
+
+            var row = document.createElement("tr");
+            row.appendChild(createInputCell("Paga oraria"));
+            row.appendChild(createBooleanCell(false));
+            row.appendChild(createInputCell("Ragione sociale"));
+            row.appendChild(createInputCell("P. IVA"));
+            row.appendChild(createInputCell("Nome"));
+            row.appendChild(createInputCell("Cognome"));
+            row.appendChild(createInputCell("Nascita"));
+            row.appendChild(createInputCell("IBAN"));
+            row.appendChild(createInputCell("Cod. fiscale"));
+            row.appendChild(createBooleanCell(true));
+            row.appendChild(createInputCell("Email"));
+            row.appendChild(createActionCell(rowNumber));
+
+            tbody.appendChild(row);
+            bindSubjectRow(row);
+        });
+    });
+
+    document.addEventListener("click", function (event) {
+        var button = event.target.closest("[data-remove-subject-row]");
+        if (!button) {
+            return;
+        }
+
+        if (!window.confirm("Vuoi davvero rimuovere questa riga?")) {
+            return;
+        }
+
+        var row = button.closest("tr");
+        var table = button.closest("table");
+        var tbody = table ? table.querySelector("tbody") : null;
+        if (!row || !table || !tbody) {
+            return;
+        }
+
+        row.remove();
+
+        if (!tbody.querySelector("tr")) {
+            tbody.appendChild(createEmptyStateRow(table));
+        }
+    });
+
+    window.FarmIOTableLock({
+        table: "#{{ table_id }}",
+        lockButton: '[data-lock-table="{{ table_id }}"]',
+        unlockButton: '[data-unlock-table="{{ table_id }}"]',
+        addButtonsSelector: '[data-add-subject-row="{{ table_id }}"]',
+        removeButtonsSelector: "[data-remove-subject-row]",
+        onToggle: function (locked, table) {
+            if (locked) {
+                return;
+            }
+            table.querySelectorAll("tbody tr").forEach(function (row) {
+                syncManagerRule(row);
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

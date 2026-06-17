@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.table-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.delete-row-button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e74a3b;
+    color: #e74a3b;
+    background: #fff;
+    border-radius: 0.35rem;
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.delete-row-button:hover {
+    background: #e74a3b;
+    color: #fff;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div id="wrapper">
+    {% include "partials/_sidebar.html" %}
+
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <h4 class="m-0 text-gray-800">{{ title }}</h4>
+            </nav>
+
+            <div class="container-fluid">
+                {% include "partials/_page_navigation.html" %}
+                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                    <div>
+                        <h1 class="h3 mb-1 text-gray-800">{{ title }}</h1>
+                        <p class="mb-0 text-muted">{{ subtitle }}</p>
+                    </div>
+                    <div class="farmio-edit-controls">
+                        <button class="btn btn-outline-success shadow-sm" type="button" data-lock-table="{{ table_id }}">
+                            <i class="fas fa-check fa-sm mr-1"></i>
+                            Conferma tabella
+                        </button>
+                        <button class="btn btn-outline-warning shadow-sm d-none" type="button" data-unlock-table="{{ table_id }}">
+                            <i class="fas fa-pen fa-sm mr-1"></i>
+                            Modifica tabella
+                        </button>
+                        <button class="btn btn-success shadow-sm" type="button" data-add-row="{{ table_id }}">
+                            <i class="fas fa-plus fa-sm text-white-50 mr-1"></i>
+                            Aggiungi riga
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card shadow mb-4 farmio-card">
+                    <div class="card-header py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-success">Elenco {{ title|lower }}</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table
+                                class="table table-bordered table-hover align-middle farmio-data-table"
+                                id="{{ table_id }}"
+                                data-row-count="{{ prefill_rows|default(0) }}"
+                                data-empty-colspan="{{ columns|length + 1 }}"
+                                {% if row_action_label %}
+                                data-action-label="{{ row_action_label }}"
+                                data-action-base-url="{{ row_action_base_url }}"
+                                {% endif %}
+                            >
+                                <thead>
+                                    <tr>
+                                        {% for column in columns %}
+                                        <th>{{ column }}</th>
+                                        {% endfor %}
+                                        <th class="text-center">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row_index in range(prefill_rows|default(0)) %}
+                                    <tr>
+                                        {% for column in columns %}
+                                        <td>
+                                            <input type="text" class="form-control" placeholder="{{ column }}">
+                                        </td>
+                                        {% endfor %}
+                                        <td class="text-center">
+                                            <div class="table-actions">
+                                            <button type="button" class="delete-row-button" data-remove-row title="Rimuovi riga" aria-label="Rimuovi riga">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            {% if row_action_label %}
+                                            <a class="btn btn-sm btn-outline-success" href="{{ row_action_base_url }}{{ row_index + 1 }}">
+                                                {{ row_action_label }}
+                                            </a>
+                                            {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% if prefill_rows|default(0) == 0 %}
+                                    <tr class="empty-state">
+                                        <td colspan="{{ columns|length + 1 }}" class="text-center text-muted py-4">
+                                            Nessun elemento inserito. Usa "Aggiungi riga" per iniziare.
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>FarmIO © 2026 by Compagnia del Grifone SRL</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    function createInputCell(placeholderText) {
+        var cell = document.createElement("td");
+        var input = document.createElement("input");
+        input.type = "text";
+        input.className = "form-control";
+        input.placeholder = placeholderText;
+        cell.appendChild(input);
+        return cell;
+    }
+
+    function createActionCell(actionLabel, actionBaseUrl, rowNumber) {
+        var cell = document.createElement("td");
+        cell.className = "text-center";
+        var actions = document.createElement("div");
+        actions.className = "table-actions";
+
+        var removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.className = "delete-row-button";
+        removeButton.title = "Rimuovi riga";
+        removeButton.setAttribute("aria-label", "Rimuovi riga");
+        removeButton.setAttribute("data-remove-row", "");
+        removeButton.innerHTML = '<i class="fas fa-times"></i>';
+        actions.appendChild(removeButton);
+
+        if (actionLabel && actionBaseUrl) {
+            var link = document.createElement("a");
+            link.className = "btn btn-sm btn-outline-success";
+            link.href = actionBaseUrl + rowNumber;
+            link.textContent = actionLabel;
+            actions.appendChild(link);
+        }
+
+        cell.appendChild(actions);
+        return cell;
+    }
+
+    function createEmptyStateRow(table) {
+        var row = document.createElement("tr");
+        row.className = "empty-state";
+
+        var cell = document.createElement("td");
+        cell.colSpan = Number(table.dataset.emptyColspan || "1");
+        cell.className = "text-center text-muted py-4";
+        cell.textContent = 'Nessun elemento inserito. Usa "Aggiungi riga" per iniziare.';
+
+        row.appendChild(cell);
+        return row;
+    }
+
+    document.querySelectorAll("[data-add-row]").forEach(function (button) {
+        button.addEventListener("click", function () {
+            var table = document.getElementById(button.dataset.addRow);
+            if (!table) {
+                return;
+            }
+
+            var tbody = table.querySelector("tbody");
+            var emptyState = tbody.querySelector(".empty-state");
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            var row = document.createElement("tr");
+            var headers = Array.from(table.querySelectorAll("thead th"));
+            var actionLabel = table.dataset.actionLabel;
+            var actionBaseUrl = table.dataset.actionBaseUrl;
+            var hasAction = Boolean(actionLabel && actionBaseUrl);
+            var dataHeaders = headers.slice(0, -1);
+
+            dataHeaders.forEach(function (header) {
+                row.appendChild(createInputCell(header.textContent.trim()));
+            });
+
+            var rowNumber = Number(table.dataset.rowCount || "0") + 1;
+            table.dataset.rowCount = String(rowNumber);
+            row.appendChild(createActionCell(hasAction ? actionLabel : "", hasAction ? actionBaseUrl : "", rowNumber));
+
+            tbody.appendChild(row);
+        });
+    });
+
+    document.addEventListener("click", function (event) {
+        var button = event.target.closest("[data-remove-row]");
+        if (!button) {
+            return;
+        }
+
+        if (!window.confirm("Vuoi davvero rimuovere questa riga?")) {
+            return;
+        }
+
+        var row = button.closest("tr");
+        var table = button.closest("table");
+        var tbody = table ? table.querySelector("tbody") : null;
+        if (!row || !table || !tbody) {
+            return;
+        }
+
+        row.remove();
+
+        if (!tbody.querySelector("tr")) {
+            tbody.appendChild(createEmptyStateRow(table));
+        }
+    });
+
+    window.FarmIOTableLock({
+        table: "#{{ table_id }}",
+        lockButton: '[data-lock-table="{{ table_id }}"]',
+        unlockButton: '[data-unlock-table="{{ table_id }}"]',
+        addButtonsSelector: '[data-add-row="{{ table_id }}"]',
+        removeButtonsSelector: "[data-remove-row]"
+    });
+});
+</script>
+{% endblock %}

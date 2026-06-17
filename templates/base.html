@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>{% block title %}FarmIO{% endblock %}</title>
+
+    <!-- Font Awesome -->
+    <link href="{{ url_for('static', filename='vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
+
+    <!-- Custom styles -->
+    <link href="{{ url_for('static', filename='css/sb-admin-2.min.css') }}" rel="stylesheet">
+
+    <style>
+        .farmio-card {
+            border: 0;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .farmio-data-table {
+            min-width: 100%;
+            margin-bottom: 0;
+        }
+
+        .farmio-data-table thead th {
+            background: #f8faf9;
+            color: #51736a;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            border-bottom: 1px solid #dfe7e3;
+            vertical-align: middle;
+        }
+
+        .farmio-data-table td {
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .farmio-data-table tbody tr:hover {
+            background: #fbfdfc;
+        }
+
+        .farmio-data-table .form-control {
+            min-width: 140px;
+            border-radius: 0.7rem;
+            border-color: #dbe5df;
+            box-shadow: none;
+        }
+
+        .farmio-data-table .form-control:focus {
+            border-color: #7cc4a6;
+            box-shadow: 0 0 0 0.15rem rgba(28, 200, 138, 0.12);
+        }
+
+        .farmio-edit-controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .farmio-table-locked {
+            opacity: 0.98;
+        }
+
+        .farmio-table-locked .form-control[readonly] {
+            background: #f7f9f8;
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body {% block body_attrs %}id="page-top"{% endblock %}>
+{% block body %}{% endblock %}
+
+<!-- jQuery -->
+<script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
+
+<!-- Bootstrap -->
+<script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
+<!-- jQuery Easing -->
+<script src="{{ url_for('static', filename='vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+
+<!-- Custom scripts -->
+<script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
+
+<script>
+window.FarmIOTableLock = function (config) {
+    var table = typeof config.table === "string" ? document.querySelector(config.table) : config.table;
+    if (!table) {
+        return null;
+    }
+
+    var lockButton = typeof config.lockButton === "string" ? document.querySelector(config.lockButton) : config.lockButton;
+    var unlockButton = typeof config.unlockButton === "string" ? document.querySelector(config.unlockButton) : config.unlockButton;
+    var addButtons = Array.from(document.querySelectorAll(config.addButtonsSelector || ""));
+    var removeButtonsSelector = config.removeButtonsSelector || "";
+    var state = { locked: false };
+
+    function saveValue(element, key, value) {
+        element.dataset[key] = value ? "true" : "false";
+    }
+
+    function restoreBooleanValue(element, propertyName, key) {
+        if (!(key in element.dataset)) {
+            return;
+        }
+        element[propertyName] = element.dataset[key] === "true";
+        delete element.dataset[key];
+    }
+
+    function lockTable() {
+        if (state.locked) {
+            return;
+        }
+        state.locked = true;
+        table.dataset.locked = "true";
+        table.classList.add("farmio-table-locked");
+
+        table.querySelectorAll("input, textarea").forEach(function (element) {
+            saveValue(element, "lockReadonly", element.readOnly);
+            element.readOnly = true;
+        });
+
+        table.querySelectorAll("select, button.multi-select-toggle").forEach(function (element) {
+            saveValue(element, "lockDisabled", element.disabled);
+            element.disabled = true;
+        });
+
+        if (removeButtonsSelector) {
+            table.querySelectorAll(removeButtonsSelector).forEach(function (element) {
+                saveValue(element, "lockDisabled", element.disabled);
+                element.disabled = true;
+            });
+        }
+
+        addButtons.forEach(function (button) {
+            saveValue(button, "lockDisabled", button.disabled);
+            button.disabled = true;
+        });
+
+        if (lockButton) {
+            lockButton.classList.add("d-none");
+        }
+        if (unlockButton) {
+            unlockButton.classList.remove("d-none");
+        }
+
+        if (typeof config.onToggle === "function") {
+            config.onToggle(true, table);
+        }
+    }
+
+    function unlockTable() {
+        if (!state.locked) {
+            return;
+        }
+        state.locked = false;
+        table.dataset.locked = "false";
+        table.classList.remove("farmio-table-locked");
+
+        table.querySelectorAll("input, textarea").forEach(function (element) {
+            restoreBooleanValue(element, "readOnly", "lockReadonly");
+        });
+
+        table.querySelectorAll("select, button.multi-select-toggle").forEach(function (element) {
+            restoreBooleanValue(element, "disabled", "lockDisabled");
+        });
+
+        if (removeButtonsSelector) {
+            table.querySelectorAll(removeButtonsSelector).forEach(function (element) {
+                restoreBooleanValue(element, "disabled", "lockDisabled");
+            });
+        }
+
+        addButtons.forEach(function (button) {
+            restoreBooleanValue(button, "disabled", "lockDisabled");
+        });
+
+        if (lockButton) {
+            lockButton.classList.remove("d-none");
+        }
+        if (unlockButton) {
+            unlockButton.classList.add("d-none");
+        }
+
+        if (typeof config.onToggle === "function") {
+            config.onToggle(false, table);
+        }
+    }
+
+    if (lockButton) {
+        lockButton.addEventListener("click", lockTable);
+    }
+
+    if (unlockButton) {
+        unlockButton.addEventListener("click", unlockTable);
+        unlockButton.classList.add("d-none");
+    }
+
+    if (config.initiallyLocked !== false) {
+        lockTable();
+    }
+
+    return {
+        lock: lockTable,
+        unlock: unlockTable,
+        isLocked: function () {
+            return state.locked;
+        }
+    };
+};
+</script>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

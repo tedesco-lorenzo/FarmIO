@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+<div id="wrapper">
+    {% include "partials/_sidebar.html" %}
+
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <h4 class="m-0 text-gray-800">{{ title }}</h4>
+            </nav>
+
+            <div class="container-fluid">
+                {% include "partials/_page_navigation.html" %}
+                <div class="row">
+                    <div class="col-xl-4 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-2">Appezzamento</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">ID {{ history.plot.id }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-2">Varietà</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ history.plot.crop_variety }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-2">Storico</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ history.history_label }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h1 class="h3 mb-1 text-gray-800">{{ history.history_label }}</h1>
+                    <p class="mb-0 text-muted">{{ subtitle }}</p>
+                </div>
+
+                <div class="card shadow mb-4 farmio-card">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-success">Storico {{ history.history_label|lower }}</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover farmio-data-table">
+                                <thead>
+                                    <tr>
+                                        {% for column in history.columns %}
+                                        <th>{{ column }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in history.rows %}
+                                    <tr>
+                                        {% for value in row %}
+                                        <td>{{ value }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>FarmIO © 2026 by Compagnia del Grifone SRL</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
+{% endblock %}

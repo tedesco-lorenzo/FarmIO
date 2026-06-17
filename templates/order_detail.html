@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+<div id="wrapper">
+    {% include "partials/_sidebar.html" %}
+
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <h4 class="m-0 text-gray-800">{{ title }}</h4>
+            </nav>
+
+            <div class="container-fluid">
+                {% include "partials/_page_navigation.html" %}
+                <div class="mb-4">
+                    <h1 class="h3 mb-1 text-gray-800">{{ title }}</h1>
+                    <p class="mb-0 text-muted">{{ subtitle }}</p>
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-2">Cliente</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ order.client_name }} {{ order.client_surname }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-2">Data</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ order.date }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-2">Totale</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ order.total }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-2">Canale</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ order.channel_label }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="card shadow h-100 farmio-card">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-success">Dati ordine</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-sm-4 text-muted">ID ordine</div>
+                                    <div class="col-sm-8 font-weight-bold text-gray-800">{{ order.order_id }}</div>
+                                </div>
+                                <div class="row mb-0">
+                                    <div class="col-sm-4 text-muted">Email</div>
+                                    <div class="col-sm-8 font-weight-bold text-gray-800">{{ order.company_email }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-4">
+                        <div class="card shadow h-100 farmio-card">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-success">Dati cliente</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-sm-4 text-muted">ID cliente</div>
+                                    <div class="col-sm-8 font-weight-bold text-gray-800">{{ order.client_id }}</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-4 text-muted">Indirizzo</div>
+                                    <div class="col-sm-8 font-weight-bold text-gray-800">{{ order.address }}</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-4 text-muted">P. IVA cliente</div>
+                                    <div class="col-sm-8 font-weight-bold text-gray-800">{{ order.client_vat or '-' }}</div>
+                                </div>
+                                <div class="row mb-0">
+                                    <div class="col-sm-4 text-muted">Pagamento</div>
+                                    <div class="col-sm-8 font-weight-bold text-gray-800">{{ order.payment_method }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow mb-4 farmio-card">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-success">Righe ordine</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover farmio-data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Prodotto</th>
+                                        <th>Qtà</th>
+                                        <th>Prezzo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in order["items"] %}
+                                    <tr>
+                                        {% for value in item %}
+                                        <td>{{ value }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>FarmIO © 2026 by Compagnia del Grifone SRL</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
+{% endblock %}

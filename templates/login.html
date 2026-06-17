@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}FarmIO - Login{% endblock %}
+
+{% block body_attrs %}class="bg-light" id="page-top"{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center min-vh-100 align-items-center">
+        <div class="col-xl-5 col-lg-6 col-md-8">
+            <div class="text-center mb-4">
+                <h1 class="h2 text-success font-weight-bold mb-2">FarmIO</h1>
+                <p class="text-muted mb-0">Accedi per entrare nel gestionale</p>
+            </div>
+
+            <div class="card shadow border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="h4 text-gray-900">Accedi</h2>
+                        <p class="text-muted mb-0">Senza accesso o registrazione non e possibile usare il sito.</p>
+                    </div>
+
+                    {% if error_message %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error_message }}
+                    </div>
+                    {% endif %}
+
+                    <form class="user" method="post" action="{{ url_for('login') }}">
+                        <div class="form-group">
+                            <input type="email" class="form-control form-control-user" id="email" name="email" placeholder="Email" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" class="form-control form-control-user" id="password" name="password" placeholder="Password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-user btn-block">
+                            Accedi
+                        </button>
+                    </form>
+
+                    <hr>
+                    <div class="small text-muted text-center mb-3">
+                        Accesso admin demo: <strong>admin@farmio.local</strong> / <strong>admin123</strong>
+                    </div>
+                    <div class="text-center">
+                        <a class="small" href="{{ url_for('forgot_password') }}">Password dimenticata?</a>
+                    </div>
+                    <div class="text-center">
+                        <a class="small" href="{{ url_for('register') }}">Non hai un account? Registrati</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4 text-muted small">
+                FarmIO © 2026 by Compagnia del Grifone SRL
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,399 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.plot-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.plot-row-id {
+    min-width: 72px;
+}
+
+.plot-action-button {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.45rem;
+    border: 1px solid #d1e7d9;
+    background: #f8fcf9;
+    color: #2f855a;
+}
+
+.plot-action-button:hover {
+    background: #2f855a;
+    color: #fff;
+    text-decoration: none;
+}
+
+.plot-action-button.is-disabled,
+.plot-action-button.is-disabled:hover {
+    border-color: #dfe7e3;
+    background: #f7f9f8;
+    color: #b6c2bc;
+    pointer-events: none;
+}
+
+.plot-delete-button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e74a3b;
+    color: #e74a3b;
+    background: #fff;
+    border-radius: 0.35rem;
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.plot-delete-button:hover {
+    background: #e74a3b;
+    color: #fff;
+}
+
+.plot-boolean-select {
+    min-width: 92px;
+}
+
+.plot-row-highlight {
+    background: #f2fbf6;
+}
+
+.plot-row-highlight td {
+    border-color: #8ed4b4 !important;
+}
+
+.plot-row-highlight .form-control {
+    border-color: #7cc4a6;
+    box-shadow: 0 0 0 0.12rem rgba(28, 200, 138, 0.10);
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div id="wrapper">
+    {% include "partials/_sidebar.html" %}
+
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <h4 class="m-0 text-gray-800">{{ title }}</h4>
+            </nav>
+
+            <div class="container-fluid">
+                {% include "partials/_page_navigation.html" %}
+                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                    <div>
+                        <h1 class="h3 mb-1 text-gray-800">{{ title }}</h1>
+                        <p class="mb-0 text-muted">{{ subtitle }}</p>
+                    </div>
+                    <div class="farmio-edit-controls">
+                        <button class="btn btn-outline-success shadow-sm" type="button" data-lock-table="appezzamenti-table">
+                            <i class="fas fa-check fa-sm mr-1"></i>
+                            Conferma tabella
+                        </button>
+                        <button class="btn btn-outline-warning shadow-sm d-none" type="button" data-unlock-table="appezzamenti-table">
+                            <i class="fas fa-pen fa-sm mr-1"></i>
+                            Modifica tabella
+                        </button>
+                        <button class="btn btn-success shadow-sm" type="button" data-add-plot-row="appezzamenti-table">
+                            <i class="fas fa-plus fa-sm text-white-50 mr-1"></i>
+                            Aggiungi riga
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card shadow mb-4 farmio-card">
+                    <div class="card-header py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-success">Elenco appezzamenti</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle farmio-data-table" id="appezzamenti-table" data-row-count="{{ plots|length }}" data-empty-colspan="12">
+                                <thead>
+                                    <tr>
+                                        <th>N°</th>
+                                        <th>Composizione</th>
+                                        <th>Estensione</th>
+                                        <th>Copertura</th>
+                                        <th>Antigrandine</th>
+                                        <th>Antibrina</th>
+                                        <th>Assicurazione</th>
+                                        <th>Longitudine</th>
+                                        <th>Latitudine</th>
+                                        <th>Varietà</th>
+                                        <th>Specie</th>
+                                        <th class="text-center">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for plot in plots %}
+                                    <tr data-plot-id="{{ plot.id }}" id="plot-{{ plot.id }}">
+                                        <td>
+                                            <input type="text" class="form-control plot-row-id" value="{{ plot.id }}" readonly>
+                                        </td>
+                                        <td><input type="text" class="form-control" value="{{ plot.soil_composition }}"></td>
+                                        <td><input type="text" class="form-control" value="{{ plot.surface }}"></td>
+                                        <td>
+                                            <select class="form-control plot-boolean-select">
+                                                <option value="No" {% if plot.cover_type == "No" %}selected{% endif %}>No</option>
+                                                <option value="Sì" {% if plot.cover_type == "Sì" %}selected{% endif %}>Sì</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-control plot-boolean-select">
+                                                <option value="No" {% if plot.antigrandine == "No" %}selected{% endif %}>No</option>
+                                                <option value="Sì" {% if plot.antigrandine == "Sì" %}selected{% endif %}>Sì</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-control plot-boolean-select">
+                                                <option value="No" {% if plot.antibrina == "No" %}selected{% endif %}>No</option>
+                                                <option value="Sì" {% if plot.antibrina == "Sì" %}selected{% endif %}>Sì</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-control plot-boolean-select">
+                                                <option value="No" {% if plot.insurance_cover == "No" %}selected{% endif %}>No</option>
+                                                <option value="Sì" {% if plot.insurance_cover == "Sì" %}selected{% endif %}>Sì</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="text" class="form-control" value="{{ plot.terrain_longitude }}"></td>
+                                        <td><input type="text" class="form-control" value="{{ plot.terrain_latitude }}"></td>
+                                        <td><input type="text" class="form-control" value="{{ plot.crop_variety }}"></td>
+                                        <td><input type="text" class="form-control" value="{{ plot.crop_species }}"></td>
+                                        <td class="text-center">
+                                            <div class="plot-actions">
+                                                <button type="button" class="plot-delete-button" data-remove-plot-row title="Rimuovi riga" aria-label="Rimuovi riga">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                                <a class="plot-action-button" href="{{ url_for('appezzamento_trattamenti', plot_id=plot.id) }}" title="Trattamenti" aria-label="Trattamenti">
+                                                    <i class="fas fa-flask"></i>
+                                                </a>
+                                                <a class="plot-action-button" href="{{ url_for('appezzamento_irrigazione', plot_id=plot.id) }}" title="Irrigazione" aria-label="Irrigazione">
+                                                    <i class="fas fa-tint"></i>
+                                                </a>
+                                                <a class="plot-action-button" href="{{ url_for('appezzamento_raccolta', plot_id=plot.id) }}" title="Raccolta" aria-label="Raccolta">
+                                                    <i class="fas fa-seedling"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>FarmIO © 2026 by Compagnia del Grifone SRL</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    function createInputCell(value, isReadonly) {
+        var cell = document.createElement("td");
+        var input = document.createElement("input");
+        input.type = "text";
+        input.className = "form-control";
+        input.value = value || "";
+        if (isReadonly) {
+            input.readOnly = true;
+            input.classList.add("plot-row-id");
+        }
+        cell.appendChild(input);
+        return cell;
+    }
+
+    function createBooleanCell() {
+        var cell = document.createElement("td");
+        var select = document.createElement("select");
+        select.className = "form-control plot-boolean-select";
+
+        var optionNo = document.createElement("option");
+        optionNo.value = "No";
+        optionNo.textContent = "No";
+
+        var optionYes = document.createElement("option");
+        optionYes.value = "Sì";
+        optionYes.textContent = "Sì";
+
+        select.appendChild(optionNo);
+        select.appendChild(optionYes);
+        cell.appendChild(select);
+        return cell;
+    }
+
+    function createHistoryButton(iconClass, titleText, disabledState) {
+        var element = document.createElement(disabledState ? "span" : "a");
+        element.className = "plot-action-button" + (disabledState ? " is-disabled" : "");
+        element.title = disabledState ? "Disponibile dopo salvataggio" : titleText;
+        element.setAttribute("aria-label", titleText);
+        element.innerHTML = '<i class="' + iconClass + '"></i>';
+        return element;
+    }
+
+    function createActionCell(plotId, hasHistoryLinks) {
+        var cell = document.createElement("td");
+        cell.className = "text-center";
+        var actions = document.createElement("div");
+        actions.className = "plot-actions";
+
+        var removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.className = "plot-delete-button";
+        removeButton.title = "Rimuovi riga";
+        removeButton.setAttribute("aria-label", "Rimuovi riga");
+        removeButton.setAttribute("data-remove-plot-row", "");
+        removeButton.innerHTML = '<i class="fas fa-times"></i>';
+        actions.appendChild(removeButton);
+
+        if (hasHistoryLinks) {
+            var treatmentsLink = createHistoryButton("fas fa-flask", "Trattamenti", false);
+            treatmentsLink.href = "/appezzamenti/" + plotId + "/trattamenti";
+            actions.appendChild(treatmentsLink);
+
+            var irrigationLink = createHistoryButton("fas fa-tint", "Irrigazione", false);
+            irrigationLink.href = "/appezzamenti/" + plotId + "/irrigazione";
+            actions.appendChild(irrigationLink);
+
+            var harvestLink = createHistoryButton("fas fa-seedling", "Raccolta", false);
+            harvestLink.href = "/appezzamenti/" + plotId + "/raccolta";
+            actions.appendChild(harvestLink);
+        } else {
+            actions.appendChild(createHistoryButton("fas fa-flask", "Trattamenti", true));
+            actions.appendChild(createHistoryButton("fas fa-tint", "Irrigazione", true));
+            actions.appendChild(createHistoryButton("fas fa-seedling", "Raccolta", true));
+        }
+
+        cell.appendChild(actions);
+        return cell;
+    }
+
+    function createEmptyStateRow(table) {
+        var row = document.createElement("tr");
+        row.className = "empty-state";
+
+        var cell = document.createElement("td");
+        cell.colSpan = Number(table.dataset.emptyColspan || "1");
+        cell.className = "text-center text-muted py-4";
+        cell.textContent = 'Nessun appezzamento inserito. Usa "Aggiungi riga" per iniziare.';
+
+        row.appendChild(cell);
+        return row;
+    }
+
+    document.querySelectorAll("[data-add-plot-row]").forEach(function (button) {
+        button.addEventListener("click", function () {
+            var table = document.getElementById(button.dataset.addPlotRow);
+            if (!table) {
+                return;
+            }
+
+            var tbody = table.querySelector("tbody");
+            var emptyState = tbody.querySelector(".empty-state");
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            var row = document.createElement("tr");
+            var rowNumber = Number(table.dataset.rowCount || "0") + 1;
+            table.dataset.rowCount = String(rowNumber);
+
+            row.appendChild(createInputCell(String(rowNumber), true));
+            row.appendChild(createInputCell("", false));
+            row.appendChild(createInputCell("", false));
+            row.appendChild(createBooleanCell());
+            row.appendChild(createBooleanCell());
+            row.appendChild(createBooleanCell());
+            row.appendChild(createBooleanCell());
+            row.appendChild(createInputCell("", false));
+            row.appendChild(createInputCell("", false));
+            row.appendChild(createInputCell("", false));
+            row.appendChild(createInputCell("", false));
+            row.appendChild(createActionCell(rowNumber, false));
+
+            tbody.appendChild(row);
+        });
+    });
+
+    document.addEventListener("click", function (event) {
+        var button = event.target.closest("[data-remove-plot-row]");
+        if (!button) {
+            return;
+        }
+
+        if (!window.confirm("Vuoi davvero rimuovere questa riga?")) {
+            return;
+        }
+
+        var row = button.closest("tr");
+        var table = button.closest("table");
+        var tbody = table ? table.querySelector("tbody") : null;
+        if (!row || !table || !tbody) {
+            return;
+        }
+
+        row.remove();
+
+        if (!tbody.querySelector("tr")) {
+            tbody.appendChild(createEmptyStateRow(table));
+        }
+    });
+
+    function highlightFocusedPlot() {
+        var url = new URL(window.location.href);
+        var focusValue = url.searchParams.get("focus") || (window.location.hash ? window.location.hash.replace("#plot-", "") : "");
+        if (!focusValue) {
+            return;
+        }
+
+        var row = document.querySelector('[data-plot-id="' + focusValue + '"]');
+        if (!row) {
+            return;
+        }
+
+        row.classList.add("plot-row-highlight");
+        row.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    highlightFocusedPlot();
+
+    window.FarmIOTableLock({
+        table: "#appezzamenti-table",
+        lockButton: '[data-lock-table="appezzamenti-table"]',
+        unlockButton: '[data-unlock-table="appezzamenti-table"]',
+        addButtonsSelector: '[data-add-plot-row="appezzamenti-table"]',
+        removeButtonsSelector: "[data-remove-plot-row]"
+    });
+});
+</script>
+{% endblock %}
