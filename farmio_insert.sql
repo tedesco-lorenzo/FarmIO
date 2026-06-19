@@ -44,10 +44,10 @@ INSERT INTO REGISTRAZIONE_ORE VALUES
 
 -- 7. RISORSA MATERIALE
 INSERT INTO RISORSA_MATERIALE VALUES 
-('info@verdemurlo.it', 1, 'John Deere', '5075E', 2020, 'AA123BB', 35000.00, 1, 'Trattore', NULL),
-('contatti@terradisiena.com', 1, 'New Holland', 'T4', 2021, 'CC456DD', 42000.00, 1, 'Trattore', NULL),
-('amministrazione@bioroma.it', 1, 'Arco', 'Eco-Zappa', 2022, NULL, 1500.00, 3, NULL, 'Zappa Meccanica'),
-('f.lli_rossi@gmail.com', 1, 'Claas', 'Lexion', 2019, 'EE789FF', 120000.00, 1, 'Mietitrebbia', NULL);
+('info@verdemurlo.it', 1, 'John Deere', '5075E', 2020, 'AA123BB', 35000.00, 1, TRUE, FALSE),
+('contatti@terradisiena.com', 1, 'New Holland', 'T4', 2021, 'CC456DD', 42000.00, 1, TRUE , FALSE),
+('amministrazione@bioroma.it', 1, 'Arco', 'Eco-Zappa', 2022, NULL, 1500.00, 3, FALSE, TRUE),
+('f.lli_rossi@gmail.com', 1, 'Claas', 'Lexion', 2019, 'EE789FF', 120000.00, 1, TRUE, FALSE);
 
 -- 8. SCHEDA MANUTENZIONE
 INSERT INTO SCHEDA_MANUTENZIONE VALUES 

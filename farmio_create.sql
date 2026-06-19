@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS farmio;
-USE farmio;
+CREATE DATABASE IF NOT EXISTS farm_io_DB_1_letzgosky;
+USE farm_io_DB_1_letzgosky;
 
 -- 1. AZIENDA AGRICOLA
 CREATE TABLE AZIENDA_AGRICOLA (
@@ -11,7 +11,7 @@ CREATE TABLE AZIENDA_AGRICOLA (
 
 -- 2. STABILIMENTO
 CREATE TABLE STABILIMENTO (
-    email_azienda_agricola VARCHAR(100),
+    email_azienda_agricola VARCHAR(100) NOT NULL,
     latitudine DECIMAL(10, 8),
     longitudine DECIMAL(11, 8),
     anno_acquisto INT NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE STABILIMENTO (
 
 -- 3. TERRENO AGRICOLO
 CREATE TABLE TERRENO_AGRICOLO (
-    email_azienda_agricola VARCHAR(100),
+    email_azienda_agricola VARCHAR(100) NOT NULL,
     latitudine DECIMAL(10, 8),
     longitudine DECIMAL(11, 8),
     anno_acquisto INT NOT NULL,
@@ -44,57 +44,58 @@ CREATE TABLE COLTURA (
 
 -- 5. SOGGETTO
 CREATE TABLE SOGGETTO (
-    id_soggetto INT AUTO_INCREMENT PRIMARY KEY,
+    id_soggetto INT,
     stipendio_orario DECIMAL(10, 2) NOT NULL,
     denominazione_sociale VARCHAR(100) NULL,
-    azienda_esterna VARCHAR(100) NULL,
+    azienda_esterna TINYINT(1) NOT NULL,
     partita_iva VARCHAR(11) NULL,
     nome VARCHAR(50) NULL,
     cognome VARCHAR(50) NULL,
     data_nascita DATE NULL,
     iban VARCHAR(27) NULL,
     codice_fiscale VARCHAR(16) NULL,
-    manager VARCHAR(50) NULL,
-    operaio VARCHAR(50) NULL,
+    manager TINYINT(1) NOT NULL,
+    operaio TINYINT(1) NOT NULL,
     email_azienda_agricola VARCHAR(100) NOT NULL,
+    PRIMARY KEY (email_azienda_agricola, id_soggetto),
     FOREIGN KEY (email_azienda_agricola) REFERENCES AZIENDA_AGRICOLA(email) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- 6. REGISTRAZIONE ORE
 CREATE TABLE REGISTRAZIONE_ORE (
+    email_azienda_agricola VARCHAR(100),
     id_soggetto INT,
     data DATE,
     ore DECIMAL(4, 2) NOT NULL,
-    PRIMARY KEY (id_soggetto, data),
-    FOREIGN KEY (id_soggetto) REFERENCES SOGGETTO(id_soggetto) ON DELETE CASCADE
+    PRIMARY KEY (email_azienda_agricola, id_soggetto, data),
+    FOREIGN KEY (email_azienda_agricola, id_soggetto) REFERENCES SOGGETTO(email_azienda_agricola, id_soggetto) ON DELETE CASCADE
 );
 
 -- 7. RISORSA MATERIALE
 CREATE TABLE RISORSA_MATERIALE (
-    email_azienda_agricola VARCHAR(100),
-    id_risorsa_materiale INT,
+    email_azienda_agricola VARCHAR(100) NOT NULL,
+    id_risorsa_materiale INT AUTO_INCREMENT, -- Corretto l'ordine di AUTO_INCREMENT
     marca VARCHAR(50) NOT NULL,
     modello VARCHAR(50) NOT NULL,
     anno_acquisto INT NOT NULL,
     targa VARCHAR(20) NULL,
     prezzo DECIMAL(10, 2) NOT NULL,
-    quantita INT NOT NULL,
-    macchina_agricola VARCHAR(50) NULL,
-    attrezzatura VARCHAR(50) NULL,
-    PRIMARY KEY (email_azienda_agricola, id_risorsa_materiale),
+    quantita INT NULL,
+    macchina_agricola TINYINT(1) NOT NULL,
+    attrezzatura TINYINT(1) NOT NULL,
+    PRIMARY KEY (id_risorsa_materiale),
     FOREIGN KEY (email_azienda_agricola) REFERENCES AZIENDA_AGRICOLA(email) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- 8. SCHEDA MANUTENZIONE
 CREATE TABLE SCHEDA_MANUTENZIONE (
-    email_azienda_agricola VARCHAR(100),
     id_risorsa_materiale INT,
     id_manutenzione INT,
     data DATE NOT NULL,
     costo_manutenzione DECIMAL(10, 2) NOT NULL,
     descrizione TEXT NOT NULL,
-    PRIMARY KEY (email_azienda_agricola, id_risorsa_materiale, id_manutenzione),
-    FOREIGN KEY (email_azienda_agricola, id_risorsa_materiale) REFERENCES RISORSA_MATERIALE(email_azienda_agricola, id_risorsa_materiale) ON DELETE CASCADE
+    PRIMARY KEY (id_risorsa_materiale, id_manutenzione),
+    FOREIGN KEY (id_risorsa_materiale) REFERENCES RISORSA_MATERIALE(id_risorsa_materiale) ON DELETE CASCADE -- Allineata la FK
 );
 
 -- 9. APPEZZAMENTO
@@ -124,7 +125,7 @@ CREATE TABLE ASSEGNAZIONE (
     id_soggetto INT,
     PRIMARY KEY (id_appezzamento, data_ora_inizio_intervento_operativo, email_azienda_agricola, id_soggetto),
     FOREIGN KEY (id_appezzamento) REFERENCES APPEZZAMENTO(id_appezzamento),
-    FOREIGN KEY (id_soggetto) REFERENCES SOGGETTO(id_soggetto)
+    FOREIGN KEY (email_azienda_agricola, id_soggetto) REFERENCES SOGGETTO(email_azienda_agricola, id_soggetto) -- Allineata la FK composta
 );
 
 -- 11. INTERVENTO OPERATIVO
@@ -139,12 +140,11 @@ CREATE TABLE INTERVENTO_OPERATIVO (
 
 -- 12. UTILIZZO
 CREATE TABLE UTILIZZO (
-    email_azienda_agricola VARCHAR(100),
     id_risorsa_materiale INT,
     id_appezzamento INT,
     data_ora_inizio_intervento_operativo DATETIME,
-    PRIMARY KEY (email_azienda_agricola, id_risorsa_materiale, id_appezzamento, data_ora_inizio_intervento_operativo),
-    FOREIGN KEY (email_azienda_agricola, id_risorsa_materiale) REFERENCES RISORSA_MATERIALE(email_azienda_agricola, id_risorsa_materiale),
+    PRIMARY KEY (id_risorsa_materiale, id_appezzamento, data_ora_inizio_intervento_operativo),
+    FOREIGN KEY (id_risorsa_materiale) REFERENCES RISORSA_MATERIALE(id_risorsa_materiale),
     FOREIGN KEY (id_appezzamento) REFERENCES APPEZZAMENTO(id_appezzamento)
 );
 
@@ -155,7 +155,7 @@ CREATE TABLE IRRIGAZIONE (
     nome_prodotto VARCHAR(100) NULL,
     quantita_prodotto DECIMAL(10, 2) NULL,
     id_appezzamento INT,
-    PRIMARY KEY (data, ora_inizio, id_appezzamento),
+    PRIMARY KEY (data, id_appezzamento),
     FOREIGN KEY (id_appezzamento) REFERENCES APPEZZAMENTO(id_appezzamento) ON DELETE CASCADE
 );
 
@@ -199,14 +199,14 @@ CREATE TABLE RACCOLTA (
 
 -- 17. PUNTO VENDITA
 CREATE TABLE PUNTO_VENDITA (
-    email_azienda_agricola VARCHAR(100),
+    email_azienda_agricola VARCHAR(100) NOT NULL,
     partita_iva VARCHAR(11),
     nome VARCHAR(100) NOT NULL,
     indirizzo VARCHAR(150) NOT NULL,
     orari_apertura VARCHAR(100) NULL,
-    negozio_fisico BOOLEAN NULL,
-    online BOOLEAN NULL,
-    PRIMARY KEY (email_azienda_agricola, partita_iva),
+    negozio_fisico BOOLEAN NOT NULL,
+    online BOOLEAN NOT NULL,
+    PRIMARY KEY (partita_iva),
     FOREIGN KEY (email_azienda_agricola) REFERENCES AZIENDA_AGRICOLA(email) ON DELETE CASCADE
 );
 
@@ -240,7 +240,6 @@ CREATE TABLE ORDINE (
     totale_ordine DECIMAL(10, 2) NOT NULL,
     id_cliente INT NULL,
     partita_iva_punto_vendita VARCHAR(11) NOT NULL,
-    email_azienda_agricola VARCHAR(100) NOT NULL,
     FOREIGN KEY (id_cliente) REFERENCES CLIENTE(id_cliente),
-    FOREIGN KEY (email_azienda_agricola, partita_iva_punto_vendita) REFERENCES PUNTO_VENDITA(email_azienda_agricola, partita_iva)
+    FOREIGN KEY (partita_iva_punto_vendita) REFERENCES PUNTO_VENDITA(partita_iva) -- Allineata la FK alla PK di PUNTO_VENDITA
 );
