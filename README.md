@@ -35,17 +35,12 @@ Il progetto parte da un template dashboard adattato a Flask, ma oggi contiene un
 - `Flask`
 - `Flask-SQLAlchemy`
 - `PyMySQL`
-- `MySQL / MariaDB`
+- `MySQL`
 - `Bootstrap`
 
 ## Struttura principale
 
-- `app.py` → avvio Flask, configurazione app, protezione pagine ed errori
-- `extensions.py` → inizializzazione condivisa di `SQLAlchemy`
-- `models.py` → modelli SQLAlchemy collegati al database
-- `services.py` → query e trasformazioni dati comuni alle pagine
-- `utils.py` → helper di formattazione, parsing e sessione
-- `routes/` → route Flask divise per area funzionale
+- `app.py` → logica Flask, route, modelli SQLAlchemy e salvataggi
 - `templates/` → pagine HTML Flask
 - `templates/partials/` → sidebar e componenti comuni
 - `static/` → CSS, JS, immagini e asset del template adattato
@@ -62,7 +57,7 @@ Il progetto parte da un template dashboard adattato a Flask, ma oggi contiene un
 pip3 install -r requirements.txt
 ```
 
-3. Avvia MySQL/MariaDB da XAMPP.
+3. Avvia MySQL da XAMPP.
 4. Crea la struttura del database:
 
 ```bash
@@ -115,9 +110,9 @@ Nel file `farmio_insert.sql` sono presenti due aziende di esempio:
 ## Note utili
 
 - il progetto usa `use_reloader=False`, quindi Flask non parte due volte
+- dopo una modifica a `app.py`, riavvia manualmente il server
 - i dati mostrati nelle pagine vengono filtrati in base all'email dell'azienda loggata
-- la logica è stata separata tra `routes`, `services`, `models` e `utils`, così `app.py` resta leggero
-- le route mantengono gli stessi endpoint usati dai template, quindi il sito resta coerente anche dopo il refactor
+- alcune tabelle sono già collegate al database anche in inserimento/modifica, altre potranno essere completate progressivamente
 
 ## Obiettivo del progetto
 
