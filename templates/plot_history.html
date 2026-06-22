@@ -161,8 +161,26 @@
                                             <td><input type="text" class="form-control" name="date[]" value="{{ row.date }}"></td>
                                             <td><input type="text" class="form-control" name="harvest_quantity[]" value="{{ row.harvest_quantity }}"></td>
                                             <td><input type="text" class="form-control" name="stock_year[]" value="{{ row.stock_year }}"></td>
-                                            <td><input type="text" class="form-control" name="crop_variety[]" value="{{ row.crop_variety }}"></td>
-                                            <td><input type="text" class="form-control" name="crop_species[]" value="{{ row.crop_species }}"></td>
+                                            <td>
+                                                <select class="form-control" name="crop_variety[]">
+                                                    <option value="">Seleziona varietà</option>
+                                                    {% for crop_variety in crop_varieties %}
+                                                    <option value="{{ crop_variety }}" {% if row.crop_variety == crop_variety %}selected{% endif %}>
+                                                        {{ crop_variety }}
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <select class="form-control" name="crop_species[]">
+                                                    <option value="">Seleziona specie</option>
+                                                    {% for crop_species in crop_species_by_variety.get(row.crop_variety, []) %}
+                                                    <option value="{{ crop_species }}" {% if row.crop_species == crop_species %}selected{% endif %}>
+                                                        {{ crop_species }}
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
                                             {% endif %}
                                             <td class="text-center">
                                                 <div class="table-actions">
@@ -211,6 +229,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!table) {
         return;
     }
+    var cropVarieties = {{ crop_varieties|default([])|tojson }};
+    var cropSpeciesByVariety = {{ crop_species_by_variety|default({})|tojson }};
 
     function createInputCell(inputName, value, placeholderText) {
         var cell = document.createElement("td");
@@ -222,6 +242,63 @@ document.addEventListener("DOMContentLoaded", function () {
         input.placeholder = placeholderText || "";
         cell.appendChild(input);
         return cell;
+    }
+
+    function fillSelectOptions(select, options, placeholderText, selectedValue) {
+        select.innerHTML = "";
+
+        var placeholderOption = document.createElement("option");
+        placeholderOption.value = "";
+        placeholderOption.textContent = placeholderText;
+        select.appendChild(placeholderOption);
+
+        options.forEach(function (optionValue) {
+            var option = document.createElement("option");
+            option.value = optionValue;
+            option.textContent = optionValue;
+            if (selectedValue === optionValue) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+
+        if (!selectedValue) {
+            select.value = "";
+        }
+    }
+
+    function createSelectCell(inputName, placeholderText) {
+        var cell = document.createElement("td");
+        var select = document.createElement("select");
+        select.className = "form-control";
+        select.name = inputName;
+        fillSelectOptions(select, [], placeholderText, "");
+        cell.appendChild(select);
+        return cell;
+    }
+
+    function syncSpeciesOptions(varietySelect, speciesSelect, selectedSpecies) {
+        var selectedVariety = varietySelect.value || "";
+        var speciesOptions = cropSpeciesByVariety[selectedVariety] || [];
+        fillSelectOptions(speciesSelect, speciesOptions, "Seleziona specie", selectedSpecies || "");
+        if (selectedSpecies && speciesOptions.indexOf(selectedSpecies) === -1) {
+            speciesSelect.value = "";
+        }
+    }
+
+    function bindHarvestCropSelectors(row, selectedSpecies) {
+        var varietySelect = row.querySelector('select[name="crop_variety[]"]');
+        var speciesSelect = row.querySelector('select[name="crop_species[]"]');
+        if (!varietySelect || !speciesSelect) {
+            return;
+        }
+
+        fillSelectOptions(varietySelect, cropVarieties, "Seleziona varietà", varietySelect.value || "");
+        syncSpeciesOptions(varietySelect, speciesSelect, selectedSpecies || speciesSelect.value || "");
+
+        varietySelect.addEventListener("change", function () {
+            syncSpeciesOptions(varietySelect, speciesSelect, "");
+        });
     }
 
     function createActionCell() {
@@ -273,11 +350,14 @@ document.addEventListener("DOMContentLoaded", function () {
             row.appendChild(createInputCell("date[]", "", "GG/MM/AAAA"));
             row.appendChild(createInputCell("harvest_quantity[]", "", "Quantità raccolta"));
             row.appendChild(createInputCell("stock_year[]", "", "Anno scorta"));
-            row.appendChild(createInputCell("crop_variety[]", "", "Varietà"));
-            row.appendChild(createInputCell("crop_species[]", "", "Specie"));
+            row.appendChild(createSelectCell("crop_variety[]", "Seleziona varietà"));
+            row.appendChild(createSelectCell("crop_species[]", "Seleziona specie"));
         }
 
         row.appendChild(createActionCell());
+        if (historyType === "raccolta") {
+            bindHarvestCropSelectors(row, "");
+        }
         return row;
     }
 
@@ -312,6 +392,14 @@ document.addEventListener("DOMContentLoaded", function () {
             tbody.appendChild(createEmptyStateRow());
         }
     });
+
+    if (table.dataset.historyType === "raccolta") {
+        table.querySelectorAll("tbody tr").forEach(function (row) {
+            if (!row.classList.contains("empty-state")) {
+                bindHarvestCropSelectors(row);
+            }
+        });
+    }
 
     window.FarmIOTableLock({
         table: "#plot-history-table",
