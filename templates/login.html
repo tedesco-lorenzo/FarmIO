@@ -20,8 +20,18 @@
                         <p class="text-muted mb-0">Senza accesso o registrazione non e possibile usare il sito.</p>
                     </div>
 
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} farmio-auto-dismiss-alert" role="alert" data-dismiss-ms="4000">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
                     {% if error_message %}
-                    <div class="alert alert-danger" role="alert">
+                    <div class="alert alert-danger farmio-auto-dismiss-alert" role="alert" data-dismiss-ms="4000">
                         {{ error_message }}
                     </div>
                     {% endif %}
@@ -40,9 +50,6 @@
                     </form>
 
                     <hr>
-                    <div class="small text-muted text-center mb-3">
-                        Accesso admin demo: <strong>admin@farmio.local</strong> / <strong>admin123</strong>
-                    </div>
                     <div class="text-center">
                         <a class="small" href="{{ url_for('forgot_password') }}">Password dimenticata?</a>
                     </div>

@@ -77,6 +77,60 @@
         .farmio-table-locked .form-control[readonly] {
             background: #f7f9f8;
         }
+
+        .farmio-auto-dismiss-alert {
+            transition: opacity 0.45s ease, transform 0.45s ease;
+        }
+
+        .farmio-auto-dismiss-alert.is-hiding {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+
+        .farmio-alert-slot {
+            min-height: 72px;
+        }
+
+        .farmio-alert-slot:empty {
+            min-height: 72px;
+        }
+
+        .farmio-session-user {
+            padding: 0 1rem;
+            text-align: center;
+        }
+
+        .farmio-session-user-label {
+            display: block;
+            font-size: 0.68rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.75);
+            margin-bottom: 0.2rem;
+        }
+
+        .farmio-session-user-email {
+            display: block;
+            color: #fff;
+            font-size: 0.83rem;
+            font-weight: 600;
+            word-break: break-word;
+            line-height: 1.35;
+        }
+
+        .farmio-required-note {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-top: 0.55rem;
+            color: #7b8a84;
+            font-size: 0.88rem;
+        }
+
+        .farmio-required-star {
+            color: #e74a3b;
+            font-weight: 800;
+        }
     </style>
 
     {% block extra_head %}{% endblock %}
@@ -98,6 +152,35 @@
 <script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
 
 <script>
+document.addEventListener("submit", function (event) {
+    var form = event.target;
+    if (!(form instanceof HTMLFormElement)) {
+        return;
+    }
+
+    if (form.dataset.enableDisabledOnSubmit !== "true") {
+        return;
+    }
+
+    form.querySelectorAll(":disabled").forEach(function (element) {
+        element.disabled = false;
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".farmio-auto-dismiss-alert").forEach(function (alertElement) {
+        var hideDelay = Number(alertElement.dataset.dismissMs || "4000");
+
+        window.setTimeout(function () {
+            alertElement.classList.add("is-hiding");
+
+            window.setTimeout(function () {
+                alertElement.remove();
+            }, 450);
+        }, hideDelay);
+    });
+});
+
 window.FarmIOTableLock = function (config) {
     var table = typeof config.table === "string" ? document.querySelector(config.table) : config.table;
     if (!table) {
@@ -202,7 +285,7 @@ window.FarmIOTableLock = function (config) {
         }
     }
 
-    if (lockButton) {
+    if (lockButton && config.bindLockButton !== false) {
         lockButton.addEventListener("click", lockTable);
     }
 

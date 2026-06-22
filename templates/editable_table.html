@@ -54,7 +54,13 @@
                         <p class="mb-0 text-muted">{{ subtitle }}</p>
                     </div>
                     <div class="farmio-edit-controls">
-                        <button class="btn btn-outline-success shadow-sm" type="button" data-lock-table="{{ table_id }}">
+                        <button
+                            class="btn btn-outline-success shadow-sm"
+                            type="{% if save_action %}submit{% else %}button{% endif %}"
+                            {% if save_action %}form="{{ table_id }}-form"{% endif %}
+                            data-lock-table="{{ table_id }}"
+                            {% if save_action %}data-submit-before-lock="true"{% endif %}
+                        >
                             <i class="fas fa-check fa-sm mr-1"></i>
                             Conferma tabella
                         </button>
@@ -62,12 +68,38 @@
                             <i class="fas fa-pen fa-sm mr-1"></i>
                             Modifica tabella
                         </button>
+                        {% if enable_client_add|default(true) %}
                         <button class="btn btn-success shadow-sm" type="button" data-add-row="{{ table_id }}">
                             <i class="fas fa-plus fa-sm text-white-50 mr-1"></i>
                             Aggiungi riga
                         </button>
+                        {% endif %}
                     </div>
                 </div>
+
+                {% if reserve_alert_space|default(false) %}
+                <div class="farmio-alert-slot">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} mb-4 farmio-auto-dismiss-alert" role="alert" data-dismiss-ms="4000">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                {% else %}
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} mb-4 farmio-auto-dismiss-alert" role="alert" data-dismiss-ms="4000">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
 
                 <div class="card shadow mb-4 farmio-card">
                     <div class="card-header py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
@@ -75,10 +107,13 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
+                            {% if save_action %}
+                            <form method="post" action="{{ save_action }}" id="{{ table_id }}-form">
+                            {% endif %}
                             <table
                                 class="table table-bordered table-hover align-middle farmio-data-table"
                                 id="{{ table_id }}"
-                                data-row-count="{{ prefill_rows|default(0) }}"
+                                data-row-count="{{ rows|default([])|length if rows is defined else prefill_rows|default(0) }}"
                                 data-empty-colspan="{{ columns|length + 1 }}"
                                 {% if row_action_label %}
                                 data-action-label="{{ row_action_label }}"
@@ -88,17 +123,59 @@
                                 <thead>
                                     <tr>
                                         {% for column in columns %}
-                                        <th>{{ column }}</th>
+                                        <th data-column-label="{{ column }}">
+                                            {{ column }}
+                                            {% if required_column_indexes is defined and loop.index0 in required_column_indexes %}
+                                            <span class="farmio-required-star">*</span>
+                                            {% endif %}
+                                        </th>
                                         {% endfor %}
                                         <th class="text-center">Azioni</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    {% if rows is defined and rows %}
+                                    {% for row in rows %}
+                                    <tr>
+                                        {% for value in row %}
+                                        <td>
+                                            <input
+                                                type="text"
+                                                class="form-control"
+                                                value="{{ value }}"
+                                                {% if field_names is defined and field_names|length > loop.index0 %}
+                                                name="{{ field_names[loop.index0] }}[]"
+                                                {% endif %}
+                                            >
+                                        </td>
+                                        {% endfor %}
+                                        <td class="text-center">
+                                            <div class="table-actions">
+                                            <button type="button" class="delete-row-button" data-remove-row title="Rimuovi riga" aria-label="Rimuovi riga">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            {% if row_action_label %}
+                                            <a class="btn btn-sm btn-outline-success" href="{{ row_action_base_url }}{{ loop.index }}">
+                                                {{ row_action_label }}
+                                            </a>
+                                            {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% elif prefill_rows|default(0) > 0 %}
                                     {% for row_index in range(prefill_rows|default(0)) %}
                                     <tr>
                                         {% for column in columns %}
                                         <td>
-                                            <input type="text" class="form-control" placeholder="{{ column }}">
+                                            <input
+                                                type="text"
+                                                class="form-control"
+                                                placeholder="{{ column }}"
+                                                {% if field_names is defined and field_names|length > loop.index0 %}
+                                                name="{{ field_names[loop.index0] }}[]"
+                                                {% endif %}
+                                            >
                                         </td>
                                         {% endfor %}
                                         <td class="text-center">
@@ -115,7 +192,7 @@
                                         </td>
                                     </tr>
                                     {% endfor %}
-                                    {% if prefill_rows|default(0) == 0 %}
+                                    {% else %}
                                     <tr class="empty-state">
                                         <td colspan="{{ columns|length + 1 }}" class="text-center text-muted py-4">
                                             Nessun elemento inserito. Usa "Aggiungi riga" per iniziare.
@@ -124,6 +201,9 @@
                                     {% endif %}
                                 </tbody>
                             </table>
+                            {% if save_action %}
+                            </form>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -148,12 +228,17 @@
 {% block extra_scripts %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    function createInputCell(placeholderText) {
+    var fieldNames = {{ field_names|tojson if field_names is defined else 'null' }};
+
+    function createInputCell(placeholderText, inputName) {
         var cell = document.createElement("td");
         var input = document.createElement("input");
         input.type = "text";
         input.className = "form-control";
         input.placeholder = placeholderText;
+        if (inputName) {
+            input.name = inputName + "[]";
+        }
         cell.appendChild(input);
         return cell;
     }
@@ -218,8 +303,9 @@ document.addEventListener("DOMContentLoaded", function () {
             var hasAction = Boolean(actionLabel && actionBaseUrl);
             var dataHeaders = headers.slice(0, -1);
 
-            dataHeaders.forEach(function (header) {
-                row.appendChild(createInputCell(header.textContent.trim()));
+            dataHeaders.forEach(function (header, index) {
+                var inputName = Array.isArray(fieldNames) ? fieldNames[index] : null;
+                row.appendChild(createInputCell(header.dataset.columnLabel || header.textContent.trim(), inputName));
             });
 
             var rowNumber = Number(table.dataset.rowCount || "0") + 1;
@@ -259,7 +345,8 @@ document.addEventListener("DOMContentLoaded", function () {
         lockButton: '[data-lock-table="{{ table_id }}"]',
         unlockButton: '[data-unlock-table="{{ table_id }}"]',
         addButtonsSelector: '[data-add-row="{{ table_id }}"]',
-        removeButtonsSelector: "[data-remove-row]"
+        removeButtonsSelector: "[data-remove-row]",
+        bindLockButton: {% if save_action %}false{% else %}true{% endif %}
     });
 });
 </script>

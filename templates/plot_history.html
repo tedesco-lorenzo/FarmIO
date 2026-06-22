@@ -2,6 +2,37 @@
 
 {% block title %}{{ title }}{% endblock %}
 
+{% block extra_head %}
+<style>
+.table-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.delete-row-button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e74a3b;
+    color: #e74a3b;
+    background: #fff;
+    border-radius: 0.35rem;
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.delete-row-button:hover {
+    background: #e74a3b;
+    color: #fff;
+}
+</style>
+{% endblock %}
+
 {% block body %}
 <div id="wrapper">
     {% include "partials/_sidebar.html" %}
@@ -17,6 +48,45 @@
 
             <div class="container-fluid">
                 {% include "partials/_page_navigation.html" %}
+
+                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                    <div>
+                        <h1 class="h3 mb-1 text-gray-800">{{ history.history_label }}</h1>
+                        <p class="mb-0 text-muted">{{ subtitle }}</p>
+                    </div>
+                    <div class="farmio-edit-controls">
+                        <button
+                            class="btn btn-outline-success shadow-sm"
+                            type="submit"
+                            form="plot-history-form"
+                            data-lock-table="plot-history-table"
+                        >
+                            <i class="fas fa-check fa-sm mr-1"></i>
+                            Conferma tabella
+                        </button>
+                        <button class="btn btn-outline-warning shadow-sm d-none" type="button" data-unlock-table="plot-history-table">
+                            <i class="fas fa-pen fa-sm mr-1"></i>
+                            Modifica tabella
+                        </button>
+                        <button class="btn btn-success shadow-sm" type="button" data-add-history-row="plot-history-table">
+                            <i class="fas fa-plus fa-sm text-white-50 mr-1"></i>
+                            Aggiungi riga
+                        </button>
+                    </div>
+                </div>
+
+                <div class="farmio-alert-slot mb-4">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} farmio-auto-dismiss-alert" role="alert" data-dismiss-ms="4000">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+
                 <div class="row">
                     <div class="col-xl-4 col-md-6 mb-4">
                         <div class="card border-left-success shadow h-100 py-2">
@@ -44,35 +114,75 @@
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <h1 class="h3 mb-1 text-gray-800">{{ history.history_label }}</h1>
-                    <p class="mb-0 text-muted">{{ subtitle }}</p>
-                </div>
-
                 <div class="card shadow mb-4 farmio-card">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-success">Storico {{ history.history_label|lower }}</h6>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-bordered table-hover farmio-data-table">
-                                <thead>
-                                    <tr>
-                                        {% for column in history.columns %}
-                                        <th>{{ column }}</th>
+                            <form method="post" action="{{ history.save_action }}" id="plot-history-form" data-enable-disabled-on-submit="true">
+                                <table
+                                    class="table table-bordered table-hover align-middle farmio-data-table"
+                                    id="plot-history-table"
+                                    data-history-type="{{ history.history_type }}"
+                                    data-empty-colspan="{{ history.empty_colspan }}"
+                                    data-empty-message="{{ history.empty_message }}"
+                                >
+                                    <thead>
+                                        <tr>
+                                            {% for column in history.columns %}
+                                            <th>
+                                                {{ column }}
+                                                {% if history.history_type == "trattamenti" and column in ["Data", "Qtà acqua", "Prodotto", "Qtà prodotto"] %}
+                                                <span class="farmio-required-star">*</span>
+                                                {% elif history.history_type == "irrigazione" and column == "Data" %}
+                                                <span class="farmio-required-star">*</span>
+                                                {% elif history.history_type == "raccolta" and column in ["Data", "Qtà raccolta", "Anno scorta", "Varietà", "Specie"] %}
+                                                <span class="farmio-required-star">*</span>
+                                                {% endif %}
+                                            </th>
+                                            {% endfor %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in history.rows %}
+                                        <tr>
+                                            {% if history.history_type == "trattamenti" %}
+                                            <td><input type="text" class="form-control" name="date[]" value="{{ row.date }}"></td>
+                                            <td><input type="text" class="form-control" name="water_quantity[]" value="{{ row.water_quantity }}"></td>
+                                            <td><input type="text" class="form-control" name="product_name[]" value="{{ row.product_name }}"></td>
+                                            <td><input type="text" class="form-control" name="product_quantity[]" value="{{ row.product_quantity }}"></td>
+                                            {% elif history.history_type == "irrigazione" %}
+                                            <td><input type="text" class="form-control" name="date[]" value="{{ row.date }}"></td>
+                                            <td><input type="text" class="form-control" name="start_time[]" value="{{ row.start_time }}"></td>
+                                            <td><input type="text" class="form-control" name="product_name[]" value="{{ row.product_name }}"></td>
+                                            <td><input type="text" class="form-control" name="product_quantity[]" value="{{ row.product_quantity }}"></td>
+                                            {% elif history.history_type == "raccolta" %}
+                                            <td><input type="text" class="form-control" name="date[]" value="{{ row.date }}"></td>
+                                            <td><input type="text" class="form-control" name="harvest_quantity[]" value="{{ row.harvest_quantity }}"></td>
+                                            <td><input type="text" class="form-control" name="stock_year[]" value="{{ row.stock_year }}"></td>
+                                            <td><input type="text" class="form-control" name="crop_variety[]" value="{{ row.crop_variety }}"></td>
+                                            <td><input type="text" class="form-control" name="crop_species[]" value="{{ row.crop_species }}"></td>
+                                            {% endif %}
+                                            <td class="text-center">
+                                                <div class="table-actions">
+                                                    <button type="button" class="delete-row-button" data-remove-history-row title="Rimuovi riga" aria-label="Rimuovi riga">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
                                         {% endfor %}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for row in history.rows %}
-                                    <tr>
-                                        {% for value in row %}
-                                        <td>{{ value }}</td>
-                                        {% endfor %}
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                                        {% if not history.rows %}
+                                        <tr class="empty-state">
+                                            <td colspan="{{ history.empty_colspan }}" class="text-center text-muted py-4">
+                                                {{ history.empty_message }}
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -92,4 +202,125 @@
 <a class="scroll-to-top rounded" href="#page-top">
     <i class="fas fa-angle-up"></i>
 </a>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var table = document.getElementById("plot-history-table");
+    if (!table) {
+        return;
+    }
+
+    function createInputCell(inputName, value, placeholderText) {
+        var cell = document.createElement("td");
+        var input = document.createElement("input");
+        input.type = "text";
+        input.className = "form-control";
+        input.name = inputName;
+        input.value = value || "";
+        input.placeholder = placeholderText || "";
+        cell.appendChild(input);
+        return cell;
+    }
+
+    function createActionCell() {
+        var cell = document.createElement("td");
+        cell.className = "text-center";
+        var actions = document.createElement("div");
+        actions.className = "table-actions";
+
+        var removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.className = "delete-row-button";
+        removeButton.title = "Rimuovi riga";
+        removeButton.setAttribute("aria-label", "Rimuovi riga");
+        removeButton.setAttribute("data-remove-history-row", "");
+        removeButton.innerHTML = '<i class="fas fa-times"></i>';
+
+        actions.appendChild(removeButton);
+        cell.appendChild(actions);
+        return cell;
+    }
+
+    function createEmptyStateRow() {
+        var row = document.createElement("tr");
+        row.className = "empty-state";
+
+        var cell = document.createElement("td");
+        cell.colSpan = Number(table.dataset.emptyColspan || "1");
+        cell.className = "text-center text-muted py-4";
+        cell.textContent = table.dataset.emptyMessage || "";
+
+        row.appendChild(cell);
+        return row;
+    }
+
+    function createHistoryRow(historyType) {
+        var row = document.createElement("tr");
+
+        if (historyType === "trattamenti") {
+            row.appendChild(createInputCell("date[]", "", "GG/MM/AAAA"));
+            row.appendChild(createInputCell("water_quantity[]", "", "Quantità acqua"));
+            row.appendChild(createInputCell("product_name[]", "", "Prodotto"));
+            row.appendChild(createInputCell("product_quantity[]", "", "Quantità prodotto"));
+        } else if (historyType === "irrigazione") {
+            row.appendChild(createInputCell("date[]", "", "GG/MM/AAAA"));
+            row.appendChild(createInputCell("start_time[]", "", "HH:MM"));
+            row.appendChild(createInputCell("product_name[]", "", "Prodotto"));
+            row.appendChild(createInputCell("product_quantity[]", "", "Quantità prodotto"));
+        } else if (historyType === "raccolta") {
+            row.appendChild(createInputCell("date[]", "", "GG/MM/AAAA"));
+            row.appendChild(createInputCell("harvest_quantity[]", "", "Quantità raccolta"));
+            row.appendChild(createInputCell("stock_year[]", "", "Anno scorta"));
+            row.appendChild(createInputCell("crop_variety[]", "", "Varietà"));
+            row.appendChild(createInputCell("crop_species[]", "", "Specie"));
+        }
+
+        row.appendChild(createActionCell());
+        return row;
+    }
+
+    document.querySelector('[data-add-history-row="plot-history-table"]').addEventListener("click", function () {
+        var tbody = table.querySelector("tbody");
+        var emptyState = tbody.querySelector(".empty-state");
+        if (emptyState) {
+            emptyState.remove();
+        }
+        tbody.appendChild(createHistoryRow(table.dataset.historyType));
+    });
+
+    document.addEventListener("click", function (event) {
+        var button = event.target.closest("[data-remove-history-row]");
+        if (!button) {
+            return;
+        }
+
+        if (!window.confirm("Vuoi davvero rimuovere questa riga?")) {
+            return;
+        }
+
+        var row = button.closest("tr");
+        var tbody = table.querySelector("tbody");
+        if (!row || !tbody) {
+            return;
+        }
+
+        row.remove();
+
+        if (!tbody.querySelector("tr")) {
+            tbody.appendChild(createEmptyStateRow());
+        }
+    });
+
+    window.FarmIOTableLock({
+        table: "#plot-history-table",
+        lockButton: '[data-lock-table="plot-history-table"]',
+        unlockButton: '[data-unlock-table="plot-history-table"]',
+        addButtonsSelector: '[data-add-history-row="plot-history-table"]',
+        removeButtonsSelector: "[data-remove-history-row]",
+        bindLockButton: false
+    });
+});
+</script>
 {% endblock %}

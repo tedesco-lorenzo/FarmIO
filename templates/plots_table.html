@@ -101,7 +101,12 @@
                         <p class="mb-0 text-muted">{{ subtitle }}</p>
                     </div>
                     <div class="farmio-edit-controls">
-                        <button class="btn btn-outline-success shadow-sm" type="button" data-lock-table="appezzamenti-table">
+                        <button
+                            class="btn btn-outline-success shadow-sm"
+                            type="{% if save_action %}submit{% else %}button{% endif %}"
+                            {% if save_action %}form="appezzamenti-table-form"{% endif %}
+                            data-lock-table="appezzamenti-table"
+                        >
                             <i class="fas fa-check fa-sm mr-1"></i>
                             Conferma tabella
                         </button>
@@ -116,26 +121,39 @@
                     </div>
                 </div>
 
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} mb-4 farmio-auto-dismiss-alert" role="alert" data-dismiss-ms="4000">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
                 <div class="card shadow mb-4 farmio-card">
                     <div class="card-header py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
                         <h6 class="m-0 font-weight-bold text-success">Elenco appezzamenti</h6>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-bordered table-hover align-middle farmio-data-table" id="appezzamenti-table" data-row-count="{{ plots|length }}" data-empty-colspan="12">
+                            {% if save_action %}
+                            <form method="post" action="{{ save_action }}" id="appezzamenti-table-form" data-enable-disabled-on-submit="true">
+                            {% endif %}
+                            <table class="table table-bordered table-hover align-middle farmio-data-table" id="appezzamenti-table" data-row-count="{{ plots|length }}" data-empty-colspan="12" data-next-plot-id="{{ next_plot_id }}">
                                 <thead>
                                     <tr>
-                                        <th>N°</th>
-                                        <th>Composizione</th>
-                                        <th>Estensione</th>
+                                        <th>N° <span class="farmio-required-star">*</span></th>
+                                        <th>Composizione <span class="farmio-required-star">*</span></th>
+                                        <th>Estensione <span class="farmio-required-star">*</span></th>
                                         <th>Copertura</th>
                                         <th>Antigrandine</th>
                                         <th>Antibrina</th>
                                         <th>Assicurazione</th>
-                                        <th>Longitudine</th>
-                                        <th>Latitudine</th>
-                                        <th>Varietà</th>
-                                        <th>Specie</th>
+                                        <th>Longitudine <span class="farmio-required-star">*</span></th>
+                                        <th>Latitudine <span class="farmio-required-star">*</span></th>
+                                        <th>Varietà <span class="farmio-required-star">*</span></th>
+                                        <th>Specie <span class="farmio-required-star">*</span></th>
                                         <th class="text-center">Azioni</th>
                                     </tr>
                                 </thead>
@@ -143,38 +161,56 @@
                                     {% for plot in plots %}
                                     <tr data-plot-id="{{ plot.id }}" id="plot-{{ plot.id }}">
                                         <td>
-                                            <input type="text" class="form-control plot-row-id" value="{{ plot.id }}" readonly>
+                                            <input type="text" class="form-control plot-row-id" name="plot_number[]" value="{{ plot.id }}" readonly>
                                         </td>
-                                        <td><input type="text" class="form-control" value="{{ plot.soil_composition }}"></td>
-                                        <td><input type="text" class="form-control" value="{{ plot.surface }}"></td>
+                                        <td><input type="text" class="form-control" name="soil_composition[]" value="{{ plot.soil_composition }}"></td>
+                                        <td><input type="text" class="form-control" name="surface[]" value="{{ plot.surface }}"></td>
                                         <td>
-                                            <select class="form-control plot-boolean-select">
+                                            <select class="form-control plot-boolean-select" name="cover[]">
                                                 <option value="No" {% if plot.cover_type == "No" %}selected{% endif %}>No</option>
                                                 <option value="Sì" {% if plot.cover_type == "Sì" %}selected{% endif %}>Sì</option>
                                             </select>
                                         </td>
                                         <td>
-                                            <select class="form-control plot-boolean-select">
+                                            <select class="form-control plot-boolean-select" name="antigrandine[]">
                                                 <option value="No" {% if plot.antigrandine == "No" %}selected{% endif %}>No</option>
                                                 <option value="Sì" {% if plot.antigrandine == "Sì" %}selected{% endif %}>Sì</option>
                                             </select>
                                         </td>
                                         <td>
-                                            <select class="form-control plot-boolean-select">
+                                            <select class="form-control plot-boolean-select" name="antibrina[]">
                                                 <option value="No" {% if plot.antibrina == "No" %}selected{% endif %}>No</option>
                                                 <option value="Sì" {% if plot.antibrina == "Sì" %}selected{% endif %}>Sì</option>
                                             </select>
                                         </td>
                                         <td>
-                                            <select class="form-control plot-boolean-select">
+                                            <select class="form-control plot-boolean-select" name="insurance_cover[]">
                                                 <option value="No" {% if plot.insurance_cover == "No" %}selected{% endif %}>No</option>
                                                 <option value="Sì" {% if plot.insurance_cover == "Sì" %}selected{% endif %}>Sì</option>
                                             </select>
                                         </td>
-                                        <td><input type="text" class="form-control" value="{{ plot.terrain_longitude }}"></td>
-                                        <td><input type="text" class="form-control" value="{{ plot.terrain_latitude }}"></td>
-                                        <td><input type="text" class="form-control" value="{{ plot.crop_variety }}"></td>
-                                        <td><input type="text" class="form-control" value="{{ plot.crop_species }}"></td>
+                                        <td><input type="text" class="form-control" name="terrain_longitude[]" value="{{ plot.terrain_longitude }}"></td>
+                                        <td><input type="text" class="form-control" name="terrain_latitude[]" value="{{ plot.terrain_latitude }}"></td>
+                                        <td>
+                                            <select class="form-control" name="crop_variety[]">
+                                                <option value="">Seleziona varietà</option>
+                                                {% for crop_variety in crop_varieties %}
+                                                <option value="{{ crop_variety }}" {% if plot.crop_variety == crop_variety %}selected{% endif %}>
+                                                    {{ crop_variety }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-control" name="crop_species[]">
+                                                <option value="">Seleziona specie</option>
+                                                {% for crop_species in crop_species_by_variety.get(plot.crop_variety, []) %}
+                                                <option value="{{ crop_species }}" {% if plot.crop_species == crop_species %}selected{% endif %}>
+                                                    {{ crop_species }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
                                         <td class="text-center">
                                             <div class="plot-actions">
                                                 <button type="button" class="plot-delete-button" data-remove-plot-row title="Rimuovi riga" aria-label="Rimuovi riga">
@@ -195,6 +231,9 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
+                            {% if save_action %}
+                            </form>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -219,12 +258,16 @@
 {% block extra_scripts %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    function createInputCell(value, isReadonly) {
+    var cropVarieties = {{ crop_varieties|tojson }};
+    var cropSpeciesByVariety = {{ crop_species_by_variety|tojson }};
+
+    function createInputCell(value, isReadonly, inputName) {
         var cell = document.createElement("td");
         var input = document.createElement("input");
         input.type = "text";
         input.className = "form-control";
         input.value = value || "";
+        input.name = inputName;
         if (isReadonly) {
             input.readOnly = true;
             input.classList.add("plot-row-id");
@@ -233,10 +276,11 @@ document.addEventListener("DOMContentLoaded", function () {
         return cell;
     }
 
-    function createBooleanCell() {
+    function createBooleanCell(inputName) {
         var cell = document.createElement("td");
         var select = document.createElement("select");
         select.className = "form-control plot-boolean-select";
+        select.name = inputName;
 
         var optionNo = document.createElement("option");
         optionNo.value = "No";
@@ -248,6 +292,63 @@ document.addEventListener("DOMContentLoaded", function () {
 
         select.appendChild(optionNo);
         select.appendChild(optionYes);
+        cell.appendChild(select);
+        return cell;
+    }
+
+    function fillSelectOptions(select, options, placeholderText, selectedValue) {
+        select.innerHTML = "";
+
+        var placeholderOption = document.createElement("option");
+        placeholderOption.value = "";
+        placeholderOption.textContent = placeholderText;
+        select.appendChild(placeholderOption);
+
+        options.forEach(function (optionValue) {
+            var option = document.createElement("option");
+            option.value = optionValue;
+            option.textContent = optionValue;
+            if (selectedValue === optionValue) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+
+        if (!selectedValue) {
+            select.value = "";
+        }
+    }
+
+    function syncSpeciesOptions(varietySelect, speciesSelect, selectedSpecies) {
+        var selectedVariety = varietySelect.value || "";
+        var speciesOptions = cropSpeciesByVariety[selectedVariety] || [];
+        fillSelectOptions(speciesSelect, speciesOptions, "Seleziona specie", selectedSpecies || "");
+        if (selectedSpecies && speciesOptions.indexOf(selectedSpecies) === -1) {
+            speciesSelect.value = "";
+        }
+    }
+
+    function bindCropSelectors(row, selectedSpecies) {
+        var varietySelect = row.querySelector('select[name="crop_variety[]"]');
+        var speciesSelect = row.querySelector('select[name="crop_species[]"]');
+        if (!varietySelect || !speciesSelect) {
+            return;
+        }
+
+        fillSelectOptions(varietySelect, cropVarieties, "Seleziona varietà", varietySelect.value || "");
+        syncSpeciesOptions(varietySelect, speciesSelect, selectedSpecies || speciesSelect.value || "");
+
+        varietySelect.addEventListener("change", function () {
+            syncSpeciesOptions(varietySelect, speciesSelect, "");
+        });
+    }
+
+    function createCropSelectCell(inputName, placeholderText) {
+        var cell = document.createElement("td");
+        var select = document.createElement("select");
+        select.className = "form-control";
+        select.name = inputName;
+        fillSelectOptions(select, [], placeholderText, "");
         cell.appendChild(select);
         return cell;
     }
@@ -311,6 +412,19 @@ document.addEventListener("DOMContentLoaded", function () {
         return row;
     }
 
+    function getCurrentMaxPlotId(table) {
+        var maxId = 0;
+
+        table.querySelectorAll('input[name="plot_number[]"]').forEach(function (input) {
+            var value = Number(input.value || "0");
+            if (Number.isFinite(value) && value > maxId) {
+                maxId = value;
+            }
+        });
+
+        return maxId;
+    }
+
     document.querySelectorAll("[data-add-plot-row]").forEach(function (button) {
         button.addEventListener("click", function () {
             var table = document.getElementById(button.dataset.addPlotRow);
@@ -325,23 +439,27 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             var row = document.createElement("tr");
-            var rowNumber = Number(table.dataset.rowCount || "0") + 1;
-            table.dataset.rowCount = String(rowNumber);
+            var configuredNextId = Number(table.dataset.nextPlotId || "1");
+            var currentMaxId = getCurrentMaxPlotId(table);
+            var rowNumber = Math.max(configuredNextId, currentMaxId + 1);
+            table.dataset.rowCount = String(Number(table.dataset.rowCount || "0") + 1);
+            table.dataset.nextPlotId = String(rowNumber + 1);
 
-            row.appendChild(createInputCell(String(rowNumber), true));
-            row.appendChild(createInputCell("", false));
-            row.appendChild(createInputCell("", false));
-            row.appendChild(createBooleanCell());
-            row.appendChild(createBooleanCell());
-            row.appendChild(createBooleanCell());
-            row.appendChild(createBooleanCell());
-            row.appendChild(createInputCell("", false));
-            row.appendChild(createInputCell("", false));
-            row.appendChild(createInputCell("", false));
-            row.appendChild(createInputCell("", false));
+            row.appendChild(createInputCell(String(rowNumber), true, "plot_number[]"));
+            row.appendChild(createInputCell("", false, "soil_composition[]"));
+            row.appendChild(createInputCell("", false, "surface[]"));
+            row.appendChild(createBooleanCell("cover[]"));
+            row.appendChild(createBooleanCell("antigrandine[]"));
+            row.appendChild(createBooleanCell("antibrina[]"));
+            row.appendChild(createBooleanCell("insurance_cover[]"));
+            row.appendChild(createInputCell("", false, "terrain_longitude[]"));
+            row.appendChild(createInputCell("", false, "terrain_latitude[]"));
+            row.appendChild(createCropSelectCell("crop_variety[]", "Seleziona varietà"));
+            row.appendChild(createCropSelectCell("crop_species[]", "Seleziona specie"));
             row.appendChild(createActionCell(rowNumber, false));
 
             tbody.appendChild(row);
+            bindCropSelectors(row, "");
         });
     });
 
@@ -387,12 +505,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
     highlightFocusedPlot();
 
+    document.querySelectorAll("#appezzamenti-table tbody tr").forEach(function (row) {
+        if (!row.classList.contains("empty-state")) {
+            bindCropSelectors(row);
+        }
+    });
+
     window.FarmIOTableLock({
         table: "#appezzamenti-table",
         lockButton: '[data-lock-table="appezzamenti-table"]',
         unlockButton: '[data-unlock-table="appezzamenti-table"]',
         addButtonsSelector: '[data-add-plot-row="appezzamenti-table"]',
-        removeButtonsSelector: "[data-remove-plot-row]"
+        removeButtonsSelector: "[data-remove-plot-row]",
+        bindLockButton: {% if save_action %}false{% else %}true{% endif %}
     });
 });
 </script>

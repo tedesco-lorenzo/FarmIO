@@ -144,7 +144,12 @@
                         <p class="mb-0 text-muted">{{ subtitle }}</p>
                     </div>
                     <div class="farmio-edit-controls">
-                        <button class="btn btn-outline-success shadow-sm" type="button" data-lock-table="{{ table_id }}">
+                        <button
+                            class="btn btn-outline-success shadow-sm"
+                            type="{% if save_action %}submit{% else %}button{% endif %}"
+                            {% if save_action %}form="{{ table_id }}-form"{% endif %}
+                            data-lock-table="{{ table_id }}"
+                        >
                             <i class="fas fa-check fa-sm mr-1"></i>
                             Conferma tabella
                         </button>
@@ -159,34 +164,49 @@
                     </div>
                 </div>
 
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} mb-4 farmio-auto-dismiss-alert" role="alert" data-dismiss-ms="4000">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
                 <div class="card shadow mb-4 farmio-card">
                     <div class="card-header py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
                         <h6 class="m-0 font-weight-bold text-success">Elenco interventi operativi</h6>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-bordered table-hover align-middle farmio-data-table" id="{{ table_id }}" data-empty-colspan="8" data-row-count="1">
+                            {% if save_action %}
+                            <form method="post" action="{{ save_action }}" id="{{ table_id }}-form" data-enable-disabled-on-submit="true">
+                            {% endif %}
+                            <table class="table table-bordered table-hover align-middle farmio-data-table" id="{{ table_id }}" data-empty-colspan="8" data-row-count="{{ rows|length if rows is defined and rows else 1 }}">
                                 <thead>
                                     <tr>
-                                        <th>Inizio</th>
+                                        <th>Inizio <span class="farmio-required-star">*</span></th>
                                         <th>Fine</th>
-                                        <th>Descrizione</th>
+                                        <th>Descrizione <span class="farmio-required-star">*</span></th>
                                         <th>Soggetto</th>
                                         <th>Macchinari</th>
                                         <th>Attrezzature</th>
-                                        <th>Appezzamenti</th>
+                                        <th>Appezzamenti <span class="farmio-required-star">*</span></th>
                                         <th class="text-center">Azioni</th>
                                     </tr>
                                 </thead>
                                 <tbody id="{{ table_id }}-body">
+                                    {% if rows is defined and rows %}
+                                    {% for row in rows %}
                                     <tr>
-                                        <td><input type="text" class="form-control" placeholder="Inizio"></td>
-                                        <td><input type="text" class="form-control" placeholder="Fine"></td>
-                                        <td><input type="text" class="form-control" placeholder="Descrizione"></td>
-                                        <td class="multi-select-cell" data-options-type="subjects"></td>
-                                        <td class="multi-select-cell" data-options-type="machinery"></td>
-                                        <td class="multi-select-cell" data-options-type="equipment"></td>
-                                        <td class="single-select-cell" data-options-type="plots"></td>
+                                        <td><input type="text" class="form-control" name="start_at[]" value="{{ row.start_at|default('') }}" placeholder="Inizio"></td>
+                                        <td><input type="text" class="form-control" name="end_at[]" value="{{ row.end_at|default('') }}" placeholder="Fine"></td>
+                                        <td><input type="text" class="form-control" name="description[]" value="{{ row.description|default('') }}" placeholder="Descrizione"></td>
+                                        <td class="multi-select-cell" data-options-type="subjects" data-field-name="subjects[]" data-selected-values='{{ row.subjects|default([])|tojson }}'></td>
+                                        <td class="multi-select-cell" data-options-type="machinery" data-field-name="machinery[]" data-selected-values='{{ row.machinery|default([])|tojson }}'></td>
+                                        <td class="multi-select-cell" data-options-type="equipment" data-field-name="equipment[]" data-selected-values='{{ row.equipment|default([])|tojson }}'></td>
+                                        <td class="single-select-cell" data-options-type="plots" data-field-name="plot[]" data-selected-value="{{ row.plot|default('') }}"></td>
                                         <td class="text-center">
                                             <div class="table-actions">
                                                 <button type="button" class="delete-row-button" data-remove-intervention-row title="Rimuovi riga" aria-label="Rimuovi riga">
@@ -195,8 +215,30 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endfor %}
+                                    {% else %}
+                                    <tr>
+                                        <td><input type="text" class="form-control" name="start_at[]" placeholder="Inizio"></td>
+                                        <td><input type="text" class="form-control" name="end_at[]" placeholder="Fine"></td>
+                                        <td><input type="text" class="form-control" name="description[]" placeholder="Descrizione"></td>
+                                        <td class="multi-select-cell" data-options-type="subjects" data-field-name="subjects[]"></td>
+                                        <td class="multi-select-cell" data-options-type="machinery" data-field-name="machinery[]"></td>
+                                        <td class="multi-select-cell" data-options-type="equipment" data-field-name="equipment[]"></td>
+                                        <td class="single-select-cell" data-options-type="plots" data-field-name="plot[]"></td>
+                                        <td class="text-center">
+                                            <div class="table-actions">
+                                                <button type="button" class="delete-row-button" data-remove-intervention-row title="Rimuovi riga" aria-label="Rimuovi riga">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
+                            {% if save_action %}
+                            </form>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -254,6 +296,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateMultiSelectSummary(container) {
         var summary = container.querySelector(".multi-select-summary");
         var checked = Array.from(container.querySelectorAll("input[type='checkbox']:checked"));
+        var hiddenInput = container.querySelector("input[type='hidden']");
         summary.innerHTML = "";
 
         if (!checked.length) {
@@ -261,6 +304,9 @@ document.addEventListener("DOMContentLoaded", function () {
             placeholder.className = "multi-select-placeholder";
             placeholder.textContent = "Seleziona (opzionale)";
             summary.appendChild(placeholder);
+            if (hiddenInput) {
+                hiddenInput.value = "";
+            }
             return;
         }
 
@@ -270,17 +316,36 @@ document.addEventListener("DOMContentLoaded", function () {
             tag.textContent = input.dataset.label;
             summary.appendChild(tag);
         });
+
+        if (hiddenInput) {
+            hiddenInput.value = checked.map(function (input) {
+                return input.value;
+            }).join(",");
+        }
     }
 
     function buildMultiSelectCell(cell, type) {
         cell.classList.add("multi-select-cell");
         cell.setAttribute("data-options-type", type);
         cell.innerHTML = "";
+        var selectedValues = [];
+
+        if (cell.dataset.selectedValues) {
+            try {
+                selectedValues = JSON.parse(cell.dataset.selectedValues);
+            } catch (error) {
+                selectedValues = [];
+            }
+        }
 
         var toggle = document.createElement("button");
         toggle.type = "button";
         toggle.className = "multi-select-toggle";
         toggle.innerHTML = '<span class="multi-select-summary"></span><i class="fas fa-chevron-down text-muted"></i>';
+
+        var hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = cell.dataset.fieldName || (type + "[]");
 
         var panel = document.createElement("div");
         panel.className = "multi-select-panel";
@@ -293,6 +358,7 @@ document.addEventListener("DOMContentLoaded", function () {
             checkbox.type = "checkbox";
             checkbox.value = option.id;
             checkbox.dataset.label = option.label;
+            checkbox.checked = selectedValues.indexOf(option.id) !== -1 || selectedValues.indexOf(String(option.id)) !== -1;
 
             var text = document.createElement("span");
             text.textContent = option.label;
@@ -302,6 +368,7 @@ document.addEventListener("DOMContentLoaded", function () {
             panel.appendChild(label);
         });
 
+        cell.appendChild(hiddenInput);
         cell.appendChild(toggle);
         cell.appendChild(panel);
 
@@ -328,8 +395,9 @@ document.addEventListener("DOMContentLoaded", function () {
         updateMultiSelectSummary(cell);
     }
 
-    function createMultiSelectCell(type) {
+    function createMultiSelectCell(type, fieldName) {
         var cell = document.createElement("td");
+        cell.dataset.fieldName = fieldName;
         buildMultiSelectCell(cell, type);
         return cell;
     }
@@ -341,6 +409,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         var select = document.createElement("select");
         select.className = "form-control";
+        select.name = cell.dataset.fieldName || (type + "[]");
 
         var emptyOption = document.createElement("option");
         emptyOption.value = "";
@@ -351,14 +420,18 @@ document.addEventListener("DOMContentLoaded", function () {
             var selectOption = document.createElement("option");
             selectOption.value = option.id;
             selectOption.textContent = option.label;
+            if ((cell.dataset.selectedValue || "") === String(option.id)) {
+                selectOption.selected = true;
+            }
             select.appendChild(selectOption);
         });
 
         cell.appendChild(select);
     }
 
-    function createSingleSelectCell(type) {
+    function createSingleSelectCell(type, fieldName) {
         var cell = document.createElement("td");
+        cell.dataset.fieldName = fieldName;
         buildSingleSelectCell(cell, type);
         return cell;
     }
@@ -408,12 +481,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
             var row = document.createElement("tr");
             row.appendChild(createInputCell("Inizio"));
+            row.lastChild.querySelector("input").name = "start_at[]";
             row.appendChild(createInputCell("Fine"));
+            row.lastChild.querySelector("input").name = "end_at[]";
             row.appendChild(createInputCell("Descrizione"));
-            row.appendChild(createMultiSelectCell("subjects"));
-            row.appendChild(createMultiSelectCell("machinery"));
-            row.appendChild(createMultiSelectCell("equipment"));
-            row.appendChild(createSingleSelectCell("plots"));
+            row.lastChild.querySelector("input").name = "description[]";
+            row.appendChild(createMultiSelectCell("subjects", "subjects[]"));
+            row.appendChild(createMultiSelectCell("machinery", "machinery[]"));
+            row.appendChild(createMultiSelectCell("equipment", "equipment[]"));
+            row.appendChild(createSingleSelectCell("plots", "plot[]"));
             row.appendChild(createActionCell());
             tbody.appendChild(row);
 
@@ -459,6 +535,7 @@ document.addEventListener("DOMContentLoaded", function () {
         unlockButton: '[data-unlock-table="{{ table_id }}"]',
         addButtonsSelector: '[data-add-intervention-row="{{ table_id }}"]',
         removeButtonsSelector: "[data-remove-intervention-row]",
+        bindLockButton: {% if save_action %}false{% else %}true{% endif %},
         onToggle: function () {
             document.querySelectorAll(".multi-select-panel.is-open").forEach(function (panel) {
                 panel.classList.remove("is-open");

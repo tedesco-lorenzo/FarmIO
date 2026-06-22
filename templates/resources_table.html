@@ -11,36 +11,6 @@
     gap: 0.5rem;
 }
 
-.terrain-plot-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-}
-
-.terrain-plot-link {
-    width: 34px;
-    height: 34px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.55rem;
-    border: 1px solid #d1e7d9;
-    background: #f8fcf9;
-    color: #2f855a;
-    font-weight: 800;
-}
-
-.terrain-plot-link:hover {
-    background: #2f855a;
-    color: #fff;
-    text-decoration: none;
-}
-
-.terrain-plot-empty {
-    color: #98a5a0;
-    font-size: 0.85rem;
-}
-
 .delete-row-button {
     width: 30px;
     height: 30px;
@@ -59,6 +29,12 @@
 .delete-row-button:hover {
     background: #e74a3b;
     color: #fff;
+}
+
+.maintenance-link-disabled,
+.maintenance-link-disabled:hover {
+    opacity: 0.55;
+    pointer-events: none;
 }
 </style>
 {% endblock %}
@@ -86,8 +62,8 @@
                     <div class="farmio-edit-controls">
                         <button
                             class="btn btn-outline-success shadow-sm"
-                            type="{% if save_action %}submit{% else %}button{% endif %}"
-                            {% if save_action %}form="{{ table_id }}-form"{% endif %}
+                            type="submit"
+                            form="{{ table_id }}-form"
                             data-lock-table="{{ table_id }}"
                         >
                             <i class="fas fa-check fa-sm mr-1"></i>
@@ -97,7 +73,7 @@
                             <i class="fas fa-pen fa-sm mr-1"></i>
                             Modifica tabella
                         </button>
-                        <button class="btn btn-success shadow-sm" type="button" data-add-terrain-row="{{ table_id }}">
+                        <button class="btn btn-success shadow-sm" type="button" data-add-resource-row="{{ table_id }}">
                             <i class="fas fa-plus fa-sm text-white-50 mr-1"></i>
                             Aggiungi riga
                         </button>
@@ -116,62 +92,55 @@
 
                 <div class="card shadow mb-4 farmio-card">
                     <div class="card-header py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
-                        <h6 class="m-0 font-weight-bold text-success">Elenco terreni</h6>
+                        <h6 class="m-0 font-weight-bold text-success">Elenco {{ title|lower }}</h6>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            {% if save_action %}
                             <form method="post" action="{{ save_action }}" id="{{ table_id }}-form" data-enable-disabled-on-submit="true">
-                            {% endif %}
-                            <table class="table table-bordered table-hover align-middle farmio-data-table" id="{{ table_id }}" data-row-count="{{ terrains|length }}" data-empty-colspan="8">
-                                <thead>
-                                    <tr>
-                                        <th>Latitudine <span class="farmio-required-star">*</span></th>
-                                        <th>Longitudine <span class="farmio-required-star">*</span></th>
-                                        <th>Anno <span class="farmio-required-star">*</span></th>
-                                        <th>Descrizione <span class="farmio-required-star">*</span></th>
-                                        <th>Tipo terreno <span class="farmio-required-star">*</span></th>
-                                        <th>Estensione <span class="farmio-required-star">*</span></th>
-                                        <th>Appezzamenti</th>
-                                        <th class="text-center">Azioni</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for terrain in terrains %}
-                                    <tr data-terrain-id="{{ terrain.id }}">
-                                        <td><input type="text" class="form-control" name="latitude[]" value="{{ terrain.latitude }}"></td>
-                                        <td><input type="text" class="form-control" name="longitude[]" value="{{ terrain.longitude }}"></td>
-                                        <td><input type="text" class="form-control" name="year[]" value="{{ terrain.year }}"></td>
-                                        <td><input type="text" class="form-control" name="description[]" value="{{ terrain.description }}"></td>
-                                        <td><input type="text" class="form-control" name="terrain_type[]" value="{{ terrain.terrain_type }}"></td>
-                                        <td><input type="text" class="form-control" name="surface[]" value="{{ terrain.surface }}"></td>
-                                        <td>
-                                            <div class="terrain-plot-links">
-                                                {% if terrain.plot_ids %}
-                                                    {% for plot_id in terrain.plot_ids %}
-                                                    <a class="terrain-plot-link" href="{{ url_for('appezzamenti', focus=plot_id) }}" title="Apri appezzamento {{ plot_id }}" aria-label="Apri appezzamento {{ plot_id }}">
-                                                        {{ plot_id }}
+                                <table class="table table-bordered table-hover align-middle farmio-data-table" id="{{ table_id }}" data-row-count="{{ resources|length }}" data-empty-colspan="6" data-extra-label="{{ extra_column_label }}">
+                                    <thead>
+                                        <tr>
+                                            <th>Marca <span class="farmio-required-star">*</span></th>
+                                            <th>Modello <span class="farmio-required-star">*</span></th>
+                                            <th>Anno <span class="farmio-required-star">*</span></th>
+                                            <th>{{ extra_column_label }}{% if extra_required %} <span class="farmio-required-star">*</span>{% endif %}</th>
+                                            <th>Prezzo <span class="farmio-required-star">*</span></th>
+                                            <th class="text-center">Azioni</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for resource in resources %}
+                                        <tr>
+                                            <td>
+                                                <input type="hidden" name="resource_id[]" value="{{ resource.id }}">
+                                                <input type="text" class="form-control" name="brand[]" value="{{ resource.brand }}">
+                                            </td>
+                                            <td><input type="text" class="form-control" name="model[]" value="{{ resource.model }}"></td>
+                                            <td><input type="text" class="form-control" name="year[]" value="{{ resource.year }}"></td>
+                                            <td><input type="text" class="form-control" name="extra_value[]" value="{{ resource.quantity if resource_type == 'attrezzature' else resource.plate }}"></td>
+                                            <td><input type="text" class="form-control" name="price[]" value="{{ resource.price }}"></td>
+                                            <td class="text-center">
+                                                <div class="table-actions">
+                                                    <button type="button" class="delete-row-button" data-remove-resource-row title="Rimuovi riga" aria-label="Rimuovi riga">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                    <a class="btn btn-sm btn-outline-success" href="{% if resource_type == 'attrezzature' %}{{ url_for('risorse_attrezzature_manutenzioni', resource_id=resource.id) }}{% else %}{{ url_for('risorse_macchinari_manutenzioni', resource_id=resource.id) }}{% endif %}">
+                                                        Manutenzioni
                                                     </a>
-                                                    {% endfor %}
-                                                {% else %}
-                                                    <span class="terrain-plot-empty">Nessuno</span>
-                                                {% endif %}
-                                            </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="table-actions">
-                                                <button type="button" class="delete-row-button" data-remove-terrain-row title="Rimuovi riga" aria-label="Rimuovi riga">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                            {% if save_action %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        {% if not resources %}
+                                        <tr class="empty-state">
+                                            <td colspan="6" class="text-center text-muted py-4">
+                                                Nessuna risorsa inserita. Usa "Aggiungi riga" per iniziare.
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
                             </form>
-                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -196,23 +165,21 @@
 {% block extra_scripts %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    function createInputCell(placeholderText, inputName) {
+    function createInputCell(inputName, placeholderText, hiddenName) {
         var cell = document.createElement("td");
+        if (hiddenName) {
+            var hidden = document.createElement("input");
+            hidden.type = "hidden";
+            hidden.name = hiddenName;
+            hidden.value = "";
+            cell.appendChild(hidden);
+        }
         var input = document.createElement("input");
         input.type = "text";
         input.className = "form-control";
-        input.placeholder = placeholderText;
         input.name = inputName;
+        input.placeholder = placeholderText;
         cell.appendChild(input);
-        return cell;
-    }
-
-    function createPlotLinksCell() {
-        var cell = document.createElement("td");
-        var empty = document.createElement("span");
-        empty.className = "terrain-plot-empty";
-        empty.textContent = "Nessuno";
-        cell.appendChild(empty);
         return cell;
     }
 
@@ -227,9 +194,16 @@ document.addEventListener("DOMContentLoaded", function () {
         removeButton.className = "delete-row-button";
         removeButton.title = "Rimuovi riga";
         removeButton.setAttribute("aria-label", "Rimuovi riga");
-        removeButton.setAttribute("data-remove-terrain-row", "");
+        removeButton.setAttribute("data-remove-resource-row", "");
         removeButton.innerHTML = '<i class="fas fa-times"></i>';
         actions.appendChild(removeButton);
+
+        var maintenanceLink = document.createElement("a");
+        maintenanceLink.className = "btn btn-sm btn-outline-success maintenance-link-disabled";
+        maintenanceLink.href = "#";
+        maintenanceLink.textContent = "Manutenzioni";
+        maintenanceLink.setAttribute("aria-disabled", "true");
+        actions.appendChild(maintenanceLink);
 
         cell.appendChild(actions);
         return cell;
@@ -242,15 +216,15 @@ document.addEventListener("DOMContentLoaded", function () {
         var cell = document.createElement("td");
         cell.colSpan = Number(table.dataset.emptyColspan || "1");
         cell.className = "text-center text-muted py-4";
-        cell.textContent = 'Nessun terreno inserito. Usa "Aggiungi riga" per iniziare.';
+        cell.textContent = 'Nessuna risorsa inserita. Usa "Aggiungi riga" per iniziare.';
 
         row.appendChild(cell);
         return row;
     }
 
-    document.querySelectorAll("[data-add-terrain-row]").forEach(function (button) {
+    document.querySelectorAll("[data-add-resource-row]").forEach(function (button) {
         button.addEventListener("click", function () {
-            var table = document.getElementById(button.dataset.addTerrainRow);
+            var table = document.getElementById(button.dataset.addResourceRow);
             if (!table) {
                 return;
             }
@@ -262,20 +236,20 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             var row = document.createElement("tr");
-            row.appendChild(createInputCell("Latitudine", "latitude[]"));
-            row.appendChild(createInputCell("Longitudine", "longitude[]"));
-            row.appendChild(createInputCell("Anno", "year[]"));
-            row.appendChild(createInputCell("Descrizione", "description[]"));
-            row.appendChild(createInputCell("Tipo terreno", "terrain_type[]"));
-            row.appendChild(createInputCell("Estensione", "surface[]"));
-            row.appendChild(createPlotLinksCell());
+            row.appendChild(createInputCell("brand[]", "Marca", "resource_id[]"));
+            row.appendChild(createInputCell("model[]", "Modello"));
+            row.appendChild(createInputCell("year[]", "Anno"));
+            row.appendChild(createInputCell("extra_value[]", table.dataset.extraLabel || ""));
+            row.appendChild(createInputCell("price[]", "Prezzo"));
             row.appendChild(createActionCell());
             tbody.appendChild(row);
+
+            table.dataset.rowCount = String(Number(table.dataset.rowCount || "0") + 1);
         });
     });
 
     document.addEventListener("click", function (event) {
-        var button = event.target.closest("[data-remove-terrain-row]");
+        var button = event.target.closest("[data-remove-resource-row]");
         if (!button) {
             return;
         }
@@ -302,9 +276,9 @@ document.addEventListener("DOMContentLoaded", function () {
         table: "#{{ table_id }}",
         lockButton: '[data-lock-table="{{ table_id }}"]',
         unlockButton: '[data-unlock-table="{{ table_id }}"]',
-        addButtonsSelector: '[data-add-terrain-row="{{ table_id }}"]',
-        removeButtonsSelector: "[data-remove-terrain-row]",
-        bindLockButton: {% if save_action %}false{% else %}true{% endif %}
+        addButtonsSelector: '[data-add-resource-row="{{ table_id }}"]',
+        removeButtonsSelector: "[data-remove-resource-row]",
+        bindLockButton: false
     });
 });
 </script>
