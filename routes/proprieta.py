@@ -24,11 +24,11 @@ def register_proprieta_routes(app):
         facilities = Stabilimento.query.filter_by(email_azienda_agricola=company_email).all()
         rows = [
             [
-                facility.latitudine,
-                facility.longitudine,
-                facility.anno_acquisto,
                 facility.descrizione,
                 facility.estensione,
+                facility.anno_acquisto,
+                facility.latitudine,
+                facility.longitudine,
             ]
             for facility in facilities
         ]
@@ -37,10 +37,10 @@ def register_proprieta_routes(app):
             title="Stabilimenti",
             subtitle="Visualizza o aggiungi gli stabilimenti aziendali.",
             table_id="stabilimenti-table",
-            columns=["Latitudine", "Longitudine", "Anno", "Descrizione", "Estensione"],
+            columns=["Descrizione", "Estensione", "Anno", "Latitudine", "Longitudine"],
             rows=rows,
             save_action=url_for("proprieta_stabilimenti_salva"),
-            field_names=["latitudine", "longitudine", "anno_acquisto", "descrizione", "estensione"],
+            field_names=["descrizione", "estensione", "anno_acquisto", "latitudine", "longitudine"],
             required_column_indexes=[0, 1, 2, 3, 4],
         )
 

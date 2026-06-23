@@ -30,10 +30,6 @@
     background: #e74a3b;
     color: #fff;
 }
-
-.maintenance-id-field {
-    max-width: 90px;
-}
 </style>
 {% endblock %}
 
@@ -71,12 +67,21 @@
                             <i class="fas fa-pen fa-sm mr-1"></i>
                             Modifica tabella
                         </button>
-                        <button class="btn btn-success shadow-sm" type="button" data-add-maintenance-row="{{ table_id }}">
+                        <button class="btn btn-success shadow-sm" type="button" data-add-sales-point-row="{{ table_id }}">
                             <i class="fas fa-plus fa-sm text-white-50 mr-1"></i>
                             Aggiungi riga
                         </button>
                     </div>
                 </div>
+
+                {% if selected_point_vat %}
+                <div class="mb-3 d-flex align-items-center justify-content-between flex-wrap">
+                    <div class="text-success font-weight-bold">Visualizzazione filtrata sul punto vendita selezionato.</div>
+                    <a href="{{ url_for('punto_vendita_gestione') }}" class="btn btn-outline-secondary btn-sm mt-2 mt-sm-0">
+                        Mostra tutti i punti vendita
+                    </a>
+                </div>
+                {% endif %}
 
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
@@ -88,81 +93,53 @@
                     {% endif %}
                 {% endwith %}
 
-                <div class="row mb-4">
-                    <div class="col-xl-4 col-md-6 mb-4">
-                        <div class="card border-left-success shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-2">Risorsa</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ resource_label }}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-md-6 mb-4">
-                        <div class="card border-left-success shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-2">Tipo</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ "Macchinario" if resource_type == "macchinari" else "Attrezzatura" }}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-md-6 mb-4">
-                        <div class="card border-left-success shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-2">ID risorsa</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ resource_id }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="card shadow mb-4 farmio-card">
                     <div class="card-header py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
-                        <h6 class="m-0 font-weight-bold text-success">Storico manutenzioni</h6>
+                        <h6 class="m-0 font-weight-bold text-success">Elenco punti vendita</h6>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
                             <form method="post" action="{{ save_action }}" id="{{ table_id }}-form" data-enable-disabled-on-submit="true">
-                                <table class="table table-bordered table-hover align-middle farmio-data-table" id="{{ table_id }}" data-empty-colspan="5" data-next-maintenance-id="{{ next_maintenance_id }}">
+                                <table class="table table-bordered table-hover align-middle farmio-data-table" id="{{ table_id }}" data-empty-colspan="6">
                                     <thead>
                                         <tr>
-                                            <th>N°</th>
-                                            <th>Data <span class="farmio-required-star">*</span></th>
-                                            <th>Descrizione <span class="farmio-required-star">*</span></th>
-                                            <th>Costo <span class="farmio-required-star">*</span></th>
+                                            <th>Nome <span class="farmio-required-star">*</span></th>
+                                            <th>Tipo <span class="farmio-required-star">*</span></th>
+                                            <th>Indirizzo <span class="farmio-required-star">*</span></th>
+                                            <th>Orari</th>
+                                            <th>P. IVA <span class="farmio-required-star">*</span></th>
                                             <th class="text-center">Azioni</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for maintenance in maintenances %}
+                                        {% for sales_point in sales_points %}
                                         <tr>
+                                            <td><input type="text" class="form-control" name="name[]" value="{{ sales_point.name }}"></td>
                                             <td>
-                                                <input type="text" class="form-control maintenance-id-field" name="maintenance_id[]" value="{{ maintenance.maintenance_id }}" readonly>
+                                                <select class="form-control" name="channel[]">
+                                                    <option value="Online" {% if sales_point.channel == "Online" %}selected{% endif %}>Online</option>
+                                                    <option value="Fisico" {% if sales_point.channel == "Fisico" %}selected{% endif %}>Fisico</option>
+                                                </select>
                                             </td>
-                                            <td><input type="text" class="form-control" name="date[]" value="{{ maintenance.date }}"></td>
+                                            <td><input type="text" class="form-control" name="address[]" value="{{ sales_point.address }}"></td>
+                                            <td><input type="text" class="form-control" name="opening_hours[]" value="{{ sales_point.opening_hours }}"></td>
                                             <td>
-                                                <input type="text" class="form-control" name="description[]" value="{{ maintenance.description }}">
-                                            </td>
-                                            <td>
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text">€</span>
-                                                    </div>
-                                                    <input type="text" class="form-control" name="cost[]" value="{{ maintenance.cost }}">
-                                                </div>
+                                                <input type="hidden" name="original_vat[]" value="{{ sales_point.vat_number }}">
+                                                <input type="text" class="form-control" name="vat_number[]" value="{{ sales_point.vat_number }}">
                                             </td>
                                             <td class="text-center">
                                                 <div class="table-actions">
-                                                    <button type="button" class="delete-row-button" data-remove-maintenance-row title="Rimuovi riga" aria-label="Rimuovi riga">
+                                                    <button type="button" class="delete-row-button" data-remove-sales-point-row title="Rimuovi riga" aria-label="Rimuovi riga">
                                                         <i class="fas fa-times"></i>
                                                     </button>
                                                 </div>
                                             </td>
                                         </tr>
                                         {% endfor %}
-                                        {% if not maintenances %}
+                                        {% if not sales_points %}
                                         <tr class="empty-state">
-                                            <td colspan="5" class="text-center text-muted py-4">
-                                                Nessuna manutenzione inserita. Usa "Aggiungi riga" per iniziare.
+                                            <td colspan="6" class="text-center text-muted py-4">
+                                                Nessun punto vendita inserito. Usa "Aggiungi riga" per iniziare.
                                             </td>
                                         </tr>
                                         {% endif %}
@@ -193,44 +170,36 @@
 {% block extra_scripts %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    function createInputCell(inputName, placeholderText, value, isReadonly) {
+    var table = document.getElementById("{{ table_id }}");
+    if (!table) {
+        return;
+    }
+
+    function createInputCell(inputName, value, type) {
         var cell = document.createElement("td");
         var input = document.createElement("input");
-        input.type = "text";
+        input.type = type || "text";
         input.className = "form-control";
         input.name = inputName;
-        input.placeholder = placeholderText;
         input.value = value || "";
-        if (isReadonly) {
-            input.readOnly = true;
-            input.classList.add("maintenance-id-field");
-        }
         cell.appendChild(input);
         return cell;
     }
 
-    function createCurrencyCell(inputName, placeholderText) {
+    function createChannelCell() {
         var cell = document.createElement("td");
-        var group = document.createElement("div");
-        group.className = "input-group";
+        var select = document.createElement("select");
+        select.className = "form-control";
+        select.name = "channel[]";
 
-        var prepend = document.createElement("div");
-        prepend.className = "input-group-prepend";
+        ["Online", "Fisico"].forEach(function (channelLabel) {
+            var option = document.createElement("option");
+            option.value = channelLabel;
+            option.textContent = channelLabel;
+            select.appendChild(option);
+        });
 
-        var symbol = document.createElement("span");
-        symbol.className = "input-group-text";
-        symbol.textContent = "€";
-
-        var input = document.createElement("input");
-        input.type = "text";
-        input.className = "form-control";
-        input.name = inputName;
-        input.placeholder = placeholderText;
-
-        prepend.appendChild(symbol);
-        group.appendChild(prepend);
-        group.appendChild(input);
-        cell.appendChild(group);
+        cell.appendChild(select);
         return cell;
     }
 
@@ -245,55 +214,56 @@ document.addEventListener("DOMContentLoaded", function () {
         removeButton.className = "delete-row-button";
         removeButton.title = "Rimuovi riga";
         removeButton.setAttribute("aria-label", "Rimuovi riga");
-        removeButton.setAttribute("data-remove-maintenance-row", "");
+        removeButton.setAttribute("data-remove-sales-point-row", "");
         removeButton.innerHTML = '<i class="fas fa-times"></i>';
-        actions.appendChild(removeButton);
 
+        actions.appendChild(removeButton);
         cell.appendChild(actions);
         return cell;
     }
 
-    function createEmptyStateRow(table) {
+    function createEmptyStateRow() {
         var row = document.createElement("tr");
         row.className = "empty-state";
 
         var cell = document.createElement("td");
-        cell.colSpan = Number(table.dataset.emptyColspan || "1");
+        cell.colSpan = Number(table.dataset.emptyColspan || "6");
         cell.className = "text-center text-muted py-4";
-        cell.textContent = 'Nessuna manutenzione inserita. Usa "Aggiungi riga" per iniziare.';
+        cell.textContent = 'Nessun punto vendita inserito. Usa "Aggiungi riga" per iniziare.';
 
         row.appendChild(cell);
         return row;
     }
 
-    document.querySelectorAll("[data-add-maintenance-row]").forEach(function (button) {
-        button.addEventListener("click", function () {
-            var table = document.getElementById(button.dataset.addMaintenanceRow);
-            if (!table) {
-                return;
-            }
+    document.querySelector('[data-add-sales-point-row="{{ table_id }}"]').addEventListener("click", function () {
+        var tbody = table.querySelector("tbody");
+        var emptyState = tbody.querySelector(".empty-state");
+        if (emptyState) {
+            emptyState.remove();
+        }
 
-            var tbody = table.querySelector("tbody");
-            var emptyState = tbody.querySelector(".empty-state");
-            if (emptyState) {
-                emptyState.remove();
-            }
+        var row = document.createElement("tr");
 
-            var nextId = Number(table.dataset.nextMaintenanceId || "1");
-            table.dataset.nextMaintenanceId = String(nextId + 1);
+        row.appendChild(createInputCell("name[]", ""));
+        row.appendChild(createChannelCell());
+        row.appendChild(createInputCell("address[]", ""));
+        row.appendChild(createInputCell("opening_hours[]", ""));
 
-            var row = document.createElement("tr");
-            row.appendChild(createInputCell("maintenance_id[]", "N°", String(nextId), true));
-            row.appendChild(createInputCell("date[]", "GG/MM/AAAA"));
-            row.appendChild(createInputCell("description[]", "Descrizione"));
-            row.appendChild(createCurrencyCell("cost[]", "Costo"));
-            row.appendChild(createActionCell());
-            tbody.appendChild(row);
-        });
+        var vatCell = createInputCell("vat_number[]", "");
+        var originalVat = document.createElement("input");
+        originalVat.type = "hidden";
+        originalVat.name = "original_vat[]";
+        originalVat.value = "";
+        vatCell.appendChild(originalVat);
+
+        row.appendChild(vatCell);
+        row.appendChild(createActionCell());
+
+        tbody.appendChild(row);
     });
 
     document.addEventListener("click", function (event) {
-        var button = event.target.closest("[data-remove-maintenance-row]");
+        var button = event.target.closest("[data-remove-sales-point-row]");
         if (!button) {
             return;
         }
@@ -303,16 +273,15 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         var row = button.closest("tr");
-        var table = button.closest("table");
-        var tbody = table ? table.querySelector("tbody") : null;
-        if (!row || !table || !tbody) {
+        var tbody = table.querySelector("tbody");
+        if (!row || !tbody) {
             return;
         }
 
         row.remove();
 
         if (!tbody.querySelector("tr")) {
-            tbody.appendChild(createEmptyStateRow(table));
+            tbody.appendChild(createEmptyStateRow());
         }
     });
 
@@ -320,8 +289,8 @@ document.addEventListener("DOMContentLoaded", function () {
         table: "#{{ table_id }}",
         lockButton: '[data-lock-table="{{ table_id }}"]',
         unlockButton: '[data-unlock-table="{{ table_id }}"]',
-        addButtonsSelector: '[data-add-maintenance-row="{{ table_id }}"]',
-        removeButtonsSelector: "[data-remove-maintenance-row]",
+        addButtonsSelector: '[data-add-sales-point-row="{{ table_id }}"]',
+        removeButtonsSelector: "[data-remove-sales-point-row]",
         bindLockButton: false
     });
 });

@@ -9,8 +9,8 @@ def register_colture_routes(app):
         return render_template(
             "readonly_inventory_table.html",
             title="Colture",
-            subtitle="Visualizza tutte le colture disponibili nel database.",
-            table_heading="Elenco colture",
-            columns=["Varietà", "Specie", "Descrizione"],
+            subtitle="Archivio di consultazione con specie, varietà e descrizioni delle colture disponibili.",
+            table_heading="Archivio colture",
+            columns=["Specie", "Varietà", "Descrizione"],
             rows=get_crop_rows(),
         )

@@ -1,7 +1,7 @@
 from collections import defaultdict
 from decimal import Decimal
 
-from flask import url_for
+from flask import session, url_for
 
 from models import (
     Appezzamento,
@@ -57,22 +57,6 @@ def _aggregate_harvest_totals(harvest_records):
     return totals
 
 
-def _get_default_stock_price(existing_stock_rows, stock_year, crop_variety, crop_species):
-    matching_rows = [
-        stock_row
-        for stock_row in existing_stock_rows
-        if stock_row.varieta_coltura == crop_variety and stock_row.specie_coltura == crop_species
-    ]
-    if not matching_rows:
-        return ZERO_QUANTITY
-
-    closest_stock_row = min(
-        matching_rows,
-        key=lambda stock_row: (abs(stock_row.anno - stock_year), -stock_row.anno),
-    )
-    return Decimal(closest_stock_row.prezzo_unitario)
-
-
 def apply_harvest_changes_to_inventory(company_email, plot_id, new_harvest_records):
     existing_plot_harvests = Raccolta.query.filter_by(
         id_appezzamento=plot_id,
@@ -108,12 +92,7 @@ def apply_harvest_changes_to_inventory(company_email, plot_id, new_harvest_recor
                 varieta_coltura=stock_key[1],
                 specie_coltura=stock_key[2],
                 quantita_totale=ZERO_QUANTITY,
-                prezzo_unitario=_get_default_stock_price(
-                    existing_stock_rows,
-                    stock_year=stock_key[0],
-                    crop_variety=stock_key[1],
-                    crop_species=stock_key[2],
-                ),
+                prezzo_unitario=ZERO_QUANTITY,
             )
             db.session.add(stock_row)
             existing_stock_rows.append(stock_row)
@@ -134,12 +113,37 @@ def get_sales_channel_filter(channel):
     return PuntoVendita.negozio_fisico.is_(True)
 
 
-def get_sales_orders(channel):
+def get_sales_points(channel=None, point_vat=None):
     company_email = get_company_email()
     if not company_email:
         return []
 
-    order_rows = (
+    query = PuntoVendita.query.filter_by(email_azienda_agricola=company_email)
+    if channel in {"online", "fisico"}:
+        query = query.filter(get_sales_channel_filter(channel))
+    if point_vat:
+        query = query.filter(PuntoVendita.partita_iva == point_vat)
+
+    sales_points = query.order_by(PuntoVendita.nome.asc(), PuntoVendita.partita_iva.asc()).all()
+
+    return [
+        {
+            "vat_number": sales_point.partita_iva,
+            "name": sales_point.nome,
+            "address": sales_point.indirizzo,
+            "opening_hours": sales_point.orari_apertura or "",
+            "channel": "Online" if sales_point.online else "Fisico",
+        }
+        for sales_point in sales_points
+    ]
+
+
+def get_sales_orders(channel, point_vat=None):
+    company_email = get_company_email()
+    if not company_email:
+        return []
+
+    query = (
         db.session.query(Ordine, Cliente, PuntoVendita)
         .join(PuntoVendita, Ordine.partita_iva_punto_vendita == PuntoVendita.partita_iva)
         .outerjoin(Cliente, Ordine.id_cliente == Cliente.id_cliente)
@@ -147,9 +151,11 @@ def get_sales_orders(channel):
             PuntoVendita.email_azienda_agricola == company_email,
             get_sales_channel_filter(channel),
         )
-        .order_by(Ordine.data.desc(), Ordine.id_ordine.desc())
-        .all()
     )
+    if point_vat:
+        query = query.filter(PuntoVendita.partita_iva == point_vat)
+
+    order_rows = query.order_by(Ordine.data.desc(), Ordine.id_ordine.desc()).all()
 
     channel_label = get_channel_label(channel)
     orders = []
@@ -164,11 +170,10 @@ def get_sales_orders(channel):
                 "client_vat": client_record.partita_iva if client_record else "",
                 "date": format_date(order_record.data),
                 "total": format_currency(order_record.totale_ordine),
+                "point_name": sales_point.nome,
                 "point_vat": sales_point.partita_iva,
-                "company_email": sales_point.email_azienda_agricola,
                 "channel_label": channel_label,
                 "payment_method": client_record.metodo_pagamento if client_record else "-",
-                "client_email": client_record.email if client_record and client_record.email else "-",
             }
         )
     return orders
@@ -192,7 +197,6 @@ def get_client_detail(channel, client_id):
         "name": client_record.nome,
         "surname": client_record.cognome,
         "channel_label": get_channel_label(channel),
-        "email": client_record.email or "-",
         "address": client_record.indirizzo or "-",
         "vat_number": client_record.partita_iva or "",
         "payment_method": client_record.metodo_pagamento,
@@ -230,7 +234,7 @@ def get_order_detail(channel, order_id):
             id_ordine=order_record.id_ordine,
             email_azienda_agricola=company_email,
         )
-        .order_by(Prelievo.varieta_coltura.asc(), Prelievo.specie_coltura.asc())
+        .order_by(Prelievo.specie_coltura.asc(), Prelievo.varieta_coltura.asc())
         .all()
     )
 
@@ -244,7 +248,7 @@ def get_order_detail(channel, order_id):
         ).first()
         items.append(
             [
-                f"{pickup_row.varieta_coltura} / {pickup_row.specie_coltura}",
+                f"{pickup_row.specie_coltura} / {pickup_row.varieta_coltura}",
                 format_decimal(pickup_row.quantita_prodotto_ordine),
                 format_currency(stock_record.prezzo_unitario) if stock_record else "-",
             ]
@@ -259,8 +263,8 @@ def get_order_detail(channel, order_id):
         "client_vat": client_record.partita_iva if client_record else "",
         "date": format_date(order_record.data),
         "total": format_currency(order_record.totale_ordine),
+        "point_name": sales_point.nome,
         "point_vat": sales_point.partita_iva,
-        "company_email": sales_point.email_azienda_agricola,
         "channel_label": get_channel_label(channel),
         "payment_method": client_record.metodo_pagamento if client_record else "-",
         "address": client_record.indirizzo if client_record and client_record.indirizzo else "-",
@@ -275,24 +279,46 @@ def get_inventory_rows():
 
     stock_records = (
         Scorta.query.filter_by(email_azienda_agricola=company_email)
-        .order_by(Scorta.anno.desc(), Scorta.varieta_coltura.asc(), Scorta.specie_coltura.asc())
+        .order_by(Scorta.anno.desc(), Scorta.specie_coltura.asc(), Scorta.varieta_coltura.asc())
         .all()
     )
     return [
         [
+            stock_record.specie_coltura,
+            stock_record.varieta_coltura,
             stock_record.anno,
             format_decimal(stock_record.quantita_totale),
-            format_decimal(stock_record.prezzo_unitario),
-            stock_record.varieta_coltura,
-            stock_record.specie_coltura,
+            format_currency(stock_record.prezzo_unitario),
         ]
+        for stock_record in stock_records
+    ]
+
+
+def get_inventory_records():
+    company_email = get_company_email()
+    if not company_email:
+        return []
+
+    stock_records = (
+        Scorta.query.filter_by(email_azienda_agricola=company_email)
+        .order_by(Scorta.anno.desc(), Scorta.specie_coltura.asc(), Scorta.varieta_coltura.asc())
+        .all()
+    )
+    return [
+        {
+            "year": str(stock_record.anno),
+            "quantity": format_decimal(stock_record.quantita_totale),
+            "price": format_decimal(stock_record.prezzo_unitario),
+            "crop_variety": stock_record.varieta_coltura,
+            "crop_species": stock_record.specie_coltura,
+        }
         for stock_record in stock_records
     ]
 
 
 def get_crop_rows():
     crop_records = Coltura.query.order_by(Coltura.varieta.asc(), Coltura.specie.asc()).all()
-    return [[crop_record.varieta, crop_record.specie, crop_record.descrizione] for crop_record in crop_records]
+    return [[crop_record.specie, crop_record.varieta, crop_record.descrizione] for crop_record in crop_records]
 
 
 def get_crop_selection_data():
@@ -566,9 +592,9 @@ def get_plot_history(plot_id, history_type):
         "raccolta": "Raccolta",
     }
     columns_map = {
-        "trattamenti": ["Data", "Qtà acqua", "Prodotto", "Qtà prodotto", "Azioni"],
+        "trattamenti": ["Data", "Prodotto", "Qtà prodotto", "Qtà acqua", "Azioni"],
         "irrigazione": ["Data", "Ora inizio", "Prodotto", "Qtà prodotto", "Azioni"],
-        "raccolta": ["Data", "Qtà raccolta", "Anno scorta", "Varietà", "Specie", "Azioni"],
+        "raccolta": ["Data", "Qtà raccolta", "Anno scorta", "Specie", "Varietà", "Azioni"],
     }
     save_endpoints = {
         "trattamenti": "appezzamento_trattamenti_salva",
@@ -712,17 +738,39 @@ def get_intervention_rows():
 
 
 def get_dashboard_data():
+    company_email = get_company_email()
     terrains = get_terrains()
     plots = get_plots()
     subjects = get_subjects()
+    sales_points = get_sales_points()
     online_orders = get_sales_orders("online")
     physical_orders = get_sales_orders("fisico")
-    inventory_rows = get_inventory_rows()
+    inventory_records = get_inventory_records()
+    crop_rows = get_crop_rows()
+    interventions = get_intervention_rows()
     machinery_options = get_machinery_options()
     equipment_options = get_equipment_options()
+    facilities_count = (
+        Stabilimento.query.filter_by(email_azienda_agricola=company_email).count() if company_email else 0
+    )
 
     total_orders = len(online_orders) + len(physical_orders)
     total_plots = len(plots)
+    employee_count = sum(1 for subject in subjects if subject["external_company"] == "Dipendente")
+    external_subject_count = len(subjects) - employee_count
+    online_points = sum(1 for point in sales_points if point["channel"] == "Online")
+    physical_points = sum(1 for point in sales_points if point["channel"] == "Fisico")
+    pending_inventory = [
+        record
+        for record in inventory_records
+        if Decimal(record["price"] or "0") == ZERO_QUANTITY
+    ]
+    recent_orders = sorted(
+        online_orders + physical_orders,
+        key=lambda order: int(order["order_id"]),
+        reverse=True,
+    )[:6]
+    recent_interventions = interventions[:5]
 
     terrain_cards = [
         {
@@ -736,30 +784,30 @@ def get_dashboard_data():
     ]
 
     return {
-        "summary_cards": [
+        "company_name": session.get("user_name", "FarmIO"),
+        "company_email": company_email or "",
+        "main_cards": [
             {
-                "title": "Terreni",
-                "value": len(terrains),
-                "note": f"{total_plots} appezzamenti collegati",
-                "icon": "fa-map-marked-alt",
-                "color": "primary",
-                "href": url_for("proprieta_terreni"),
+                "title": "Proprietà",
+                "value": facilities_count + len(terrains),
+                "note": f"{facilities_count} stabilimenti · {len(terrains)} terreni",
+                "icon": "fa-building",
+                "color": "success",
+                "href": url_for("proprieta_stabilimenti"),
             },
             {
                 "title": "Soggetti",
                 "value": len(subjects),
-                "note": (
-                    f"{sum(1 for subject in subjects if subject['external_company'] == 'Dipendente')} dipendenti"
-                ),
+                "note": f"{employee_count} dipendenti · {external_subject_count} esterni",
                 "icon": "fa-users",
-                "color": "success",
+                "color": "primary",
                 "href": url_for("soggetto"),
             },
             {
-                "title": "Ordini",
+                "title": "Punto Vendita",
                 "value": total_orders,
-                "note": f"{len(online_orders)} online · {len(physical_orders)} fisico",
-                "icon": "fa-shopping-basket",
+                "note": f"{online_points} online · {physical_points} fisici",
+                "icon": "fa-store",
                 "color": "info",
                 "href": url_for("punto_vendita_online"),
             },
@@ -772,51 +820,97 @@ def get_dashboard_data():
                 "href": url_for("risorse_materiali"),
             },
         ],
-        "quick_links": [
+        "secondary_cards": [
             {
-                "title": "Proprietà",
-                "description": "Apri stabilimenti e terreni aziendali.",
-                "icon": "fa-building",
-                "href": url_for("proprieta_stabilimenti"),
+                "title": "Appezzamenti",
+                "value": len(plots),
+                "note": "Storici irrigazione, trattamenti e raccolta",
+                "icon": "fa-map",
+                "href": url_for("appezzamenti"),
             },
             {
-                "title": "Punto Vendita",
-                "description": "Consulta ordini online e del punto fisico.",
-                "icon": "fa-store",
-                "href": url_for("punto_vendita_online"),
-            },
-            {
-                "title": "Soggetto",
-                "description": "Gestisci dipendenti e aziende esterne.",
-                "icon": "fa-user-friends",
-                "href": url_for("soggetto"),
+                "title": "Interventi",
+                "value": len(interventions),
+                "note": "Operazioni collegate a soggetti e risorse",
+                "icon": "fa-clipboard-list",
+                "href": url_for("interventi_operativi"),
             },
             {
                 "title": "Scorte",
-                "description": "Controlla le disponibilità di magazzino.",
+                "value": len(inventory_records),
+                "note": f"{len(pending_inventory)} prezzi da controllare",
                 "icon": "fa-warehouse",
                 "href": url_for("scorte"),
             },
             {
                 "title": "Colture",
-                "description": "Consulta tutte le colture disponibili nel database.",
+                "value": len(crop_rows),
+                "note": "Archivio consultabile di specie e varietà",
+                "icon": "fa-leaf",
+                "href": url_for("colture"),
+            },
+        ],
+        "quick_links": [
+            {
+                "title": "Proprietà",
+                "description": "Stabilimenti e terreni",
+                "icon": "fa-building",
+                "href": url_for("proprieta_stabilimenti"),
+            },
+            {
+                "title": "Risorse Materiali",
+                "description": "Attrezzature e macchinari",
+                "icon": "fa-tools",
+                "href": url_for("risorse_materiali"),
+            },
+            {
+                "title": "Punto Vendita",
+                "description": "Ordini online e fisici",
+                "icon": "fa-store",
+                "href": url_for("punto_vendita_online"),
+            },
+            {
+                "title": "Soggetto",
+                "description": "Dipendenti e aziende esterne",
+                "icon": "fa-user-friends",
+                "href": url_for("soggetto"),
+            },
+            {
+                "title": "Scorte",
+                "description": "Quantità e prezzi",
+                "icon": "fa-warehouse",
+                "href": url_for("scorte"),
+            },
+            {
+                "title": "Colture",
+                "description": "Archivio di specie e varietà",
                 "icon": "fa-leaf",
                 "href": url_for("colture"),
             },
             {
                 "title": "Appezzamenti",
-                "description": "Apri la lista completa con gli storici collegati.",
+                "description": "Storici per singolo appezzamento",
                 "icon": "fa-map",
                 "href": url_for("appezzamenti"),
             },
             {
                 "title": "Interventi Operativi",
-                "description": "Coordina soggetti, mezzi e appezzamenti.",
+                "description": "Soggetti, mezzi e appezzamenti",
                 "icon": "fa-clipboard-list",
                 "href": url_for("interventi_operativi"),
             },
         ],
-        "terrain_cards": terrain_cards,
-        "recent_orders": online_orders[:2] + physical_orders[:2],
-        "inventory_preview": inventory_rows,
+        "status_items": [
+            {"label": "Stabilimenti", "value": facilities_count},
+            {"label": "Terreni", "value": len(terrains)},
+            {"label": "Appezzamenti", "value": total_plots},
+            {"label": "Punti vendita", "value": len(sales_points)},
+        ],
+        "terrain_cards": terrain_cards[:4],
+        "recent_orders": recent_orders,
+        "pending_inventory_count": len(pending_inventory),
+        "pending_inventory": pending_inventory[:6],
+        "inventory_preview": inventory_records[:5],
+        "crop_preview": crop_rows[:12],
+        "recent_interventions": recent_interventions,
     }

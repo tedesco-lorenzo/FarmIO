@@ -107,16 +107,16 @@
                             <table class="table table-bordered table-hover align-middle farmio-data-table" id="{{ table_id }}" data-row-count="{{ subjects|length }}" data-empty-colspan="11">
                                 <thead>
                                     <tr>
-                                        <th>Paga oraria <span class="farmio-required-star">*</span></th>
                                         <th>Tipo <span class="farmio-required-star">*</span></th>
-                                        <th>Ragione sociale <span class="farmio-required-star d-none" data-required-header="company">*</span></th>
-                                        <th>P. IVA</th>
                                         <th>Nome <span class="farmio-required-star d-none" data-required-header="name">*</span></th>
                                         <th>Cognome <span class="farmio-required-star d-none" data-required-header="surname">*</span></th>
-                                        <th>Nascita</th>
-                                        <th>IBAN</th>
-                                        <th>Cod. fiscale</th>
+                                        <th>Ragione sociale <span class="farmio-required-star d-none" data-required-header="company">*</span></th>
+                                        <th>P. IVA</th>
+                                        <th>Paga oraria <span class="farmio-required-star">*</span></th>
                                         <th>Manager</th>
+                                        <th>Nascita</th>
+                                        <th>Cod. fiscale</th>
+                                        <th>IBAN</th>
                                         <th class="text-center">Azioni</th>
                                     </tr>
                                 </thead>
@@ -124,28 +124,33 @@
                                     {% for subject in subjects %}
                                     <tr>
                                         <td>
-                                            <input type="hidden" name="subject_id[]" value="{{ subject.id }}">
-                                            <input type="text" class="form-control" name="hourly_pay[]" value="{{ subject.hourly_pay }}">
-                                        </td>
-                                        <td>
                                             <select class="form-control subject-boolean-select" name="subject_type[]" data-subject-type>
                                                 <option value="Dipendente" {% if subject.external_company == "Dipendente" %}selected{% endif %}>Dipendente</option>
                                                 <option value="Azienda esterna" {% if subject.external_company == "Azienda esterna" %}selected{% endif %}>Azienda esterna</option>
                                             </select>
                                         </td>
-                                        <td><input type="text" class="form-control {% if subject.external_company == 'Dipendente' %}bg-light{% endif %}" name="company_name[]" value="{{ subject.company_name }}" {% if subject.external_company == "Dipendente" %}readonly{% endif %}></td>
-                                        <td><input type="text" class="form-control" name="vat_number[]" value="{{ subject.vat_number }}"></td>
                                         <td><input type="text" class="form-control" name="name[]" value="{{ subject.name }}"></td>
                                         <td><input type="text" class="form-control" name="surname[]" value="{{ subject.surname }}"></td>
-                                        <td><input type="text" class="form-control" name="birth_date[]" value="{{ subject.birth_date }}"></td>
-                                        <td><input type="text" class="form-control" name="iban[]" value="{{ subject.iban }}"></td>
-                                        <td><input type="text" class="form-control" name="tax_code[]" value="{{ subject.tax_code }}"></td>
+                                        <td><input type="text" class="form-control {% if subject.external_company == 'Dipendente' %}bg-light{% endif %}" name="company_name[]" value="{{ subject.company_name }}" {% if subject.external_company == "Dipendente" %}readonly{% endif %}></td>
+                                        <td><input type="text" class="form-control" name="vat_number[]" value="{{ subject.vat_number }}"></td>
+                                        <td>
+                                            <input type="hidden" name="subject_id[]" value="{{ subject.id }}">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">€</span>
+                                                </div>
+                                                <input type="text" class="form-control" name="hourly_pay[]" value="{{ subject.hourly_pay }}">
+                                            </div>
+                                        </td>
                                         <td>
                                             <select class="form-control subject-boolean-select" name="manager[]" data-manager-select>
                                                 <option value="No" {% if subject.manager == "No" %}selected{% endif %}>No</option>
                                                 <option value="Sì" {% if subject.manager == "Sì" %}selected{% endif %}>Sì</option>
                                             </select>
                                         </td>
+                                        <td><input type="text" class="form-control" name="birth_date[]" value="{{ subject.birth_date }}"></td>
+                                        <td><input type="text" class="form-control" name="tax_code[]" value="{{ subject.tax_code }}"></td>
+                                        <td><input type="text" class="form-control" name="iban[]" value="{{ subject.iban }}"></td>
                                         <td class="text-center">
                                             <div class="table-actions">
                                                 <button type="button" class="delete-row-button" data-remove-subject-row title="Rimuovi riga" aria-label="Rimuovi riga">
@@ -195,6 +200,31 @@ document.addEventListener("DOMContentLoaded", function () {
         input.placeholder = placeholderText;
         input.name = inputName;
         cell.appendChild(input);
+        return cell;
+    }
+
+    function createCurrencyCell(placeholderText, inputName) {
+        var cell = document.createElement("td");
+        var group = document.createElement("div");
+        group.className = "input-group";
+
+        var prepend = document.createElement("div");
+        prepend.className = "input-group-prepend";
+
+        var symbol = document.createElement("span");
+        symbol.className = "input-group-text";
+        symbol.textContent = "€";
+
+        var input = document.createElement("input");
+        input.type = "text";
+        input.className = "form-control";
+        input.placeholder = placeholderText;
+        input.name = inputName;
+
+        prepend.appendChild(symbol);
+        group.appendChild(prepend);
+        group.appendChild(input);
+        cell.appendChild(group);
         return cell;
     }
 
@@ -315,10 +345,10 @@ document.addEventListener("DOMContentLoaded", function () {
         var isExternal = subjectTypeSelect.value === "Azienda esterna";
 
         setRequiredCell(row, 0, true, "Campo obbligatorio");
-        setRequiredCell(row, 1, true, "Campo obbligatorio");
-        setRequiredCell(row, 2, isExternal, "Obbligatorio per azienda esterna");
-        setRequiredCell(row, 4, !isExternal, "Obbligatorio per dipendente");
-        setRequiredCell(row, 5, !isExternal, "Obbligatorio per dipendente");
+        setRequiredCell(row, 1, !isExternal, "Obbligatorio per dipendente");
+        setRequiredCell(row, 2, !isExternal, "Obbligatorio per dipendente");
+        setRequiredCell(row, 3, isExternal, "Obbligatorio per azienda esterna");
+        setRequiredCell(row, 5, true, "Campo obbligatorio");
         syncHeaderMarkers(subjectTypeSelect.value);
     }
 
@@ -326,7 +356,7 @@ document.addEventListener("DOMContentLoaded", function () {
         var subjectTypeSelect = row.querySelector("[data-subject-type]");
         var managerSelect = row.querySelector("[data-manager-select]");
         var hoursLink = row.querySelector("[data-hours-link]");
-        var companyNameInput = row.children[2] ? row.children[2].querySelector("input") : null;
+        var companyNameInput = row.children[3] ? row.children[3].querySelector("input") : null;
         if (!subjectTypeSelect || !managerSelect) {
             return;
         }
@@ -402,22 +432,22 @@ document.addEventListener("DOMContentLoaded", function () {
             table.dataset.rowCount = String(rowNumber);
 
             var row = document.createElement("tr");
-            var firstCell = createInputCell("Paga oraria", "hourly_pay[]");
+            row.appendChild(createBooleanCell(false, "subject_type[]"));
+            row.appendChild(createInputCell("Nome", "name[]"));
+            row.appendChild(createInputCell("Cognome", "surname[]"));
+            row.appendChild(createInputCell("Ragione sociale", "company_name[]"));
+            row.appendChild(createInputCell("P. IVA", "vat_number[]"));
+            var firstCell = createCurrencyCell("Paga oraria", "hourly_pay[]");
             var hiddenId = document.createElement("input");
             hiddenId.type = "hidden";
             hiddenId.name = "subject_id[]";
             hiddenId.value = "";
             firstCell.insertBefore(hiddenId, firstCell.firstChild);
             row.appendChild(firstCell);
-            row.appendChild(createBooleanCell(false, "subject_type[]"));
-            row.appendChild(createInputCell("Ragione sociale", "company_name[]"));
-            row.appendChild(createInputCell("P. IVA", "vat_number[]"));
-            row.appendChild(createInputCell("Nome", "name[]"));
-            row.appendChild(createInputCell("Cognome", "surname[]"));
-            row.appendChild(createInputCell("Nascita", "birth_date[]"));
-            row.appendChild(createInputCell("IBAN", "iban[]"));
-            row.appendChild(createInputCell("Cod. fiscale", "tax_code[]"));
             row.appendChild(createBooleanCell(true, "manager[]"));
+            row.appendChild(createInputCell("Nascita", "birth_date[]"));
+            row.appendChild(createInputCell("Cod. fiscale", "tax_code[]"));
+            row.appendChild(createInputCell("IBAN", "iban[]"));
             row.appendChild(createActionCell(""));
 
             tbody.appendChild(row);

@@ -126,12 +126,12 @@
                             <table class="table table-bordered table-hover align-middle farmio-data-table" id="{{ table_id }}" data-row-count="{{ terrains|length }}" data-empty-colspan="8">
                                 <thead>
                                     <tr>
-                                        <th>Latitudine <span class="farmio-required-star">*</span></th>
-                                        <th>Longitudine <span class="farmio-required-star">*</span></th>
-                                        <th>Anno <span class="farmio-required-star">*</span></th>
                                         <th>Descrizione <span class="farmio-required-star">*</span></th>
                                         <th>Tipo terreno <span class="farmio-required-star">*</span></th>
                                         <th>Estensione <span class="farmio-required-star">*</span></th>
+                                        <th>Anno <span class="farmio-required-star">*</span></th>
+                                        <th>Latitudine <span class="farmio-required-star">*</span></th>
+                                        <th>Longitudine <span class="farmio-required-star">*</span></th>
                                         <th>Appezzamenti</th>
                                         <th class="text-center">Azioni</th>
                                     </tr>
@@ -139,12 +139,12 @@
                                 <tbody>
                                     {% for terrain in terrains %}
                                     <tr data-terrain-id="{{ terrain.id }}">
-                                        <td><input type="text" class="form-control" name="latitude[]" value="{{ terrain.latitude }}"></td>
-                                        <td><input type="text" class="form-control" name="longitude[]" value="{{ terrain.longitude }}"></td>
-                                        <td><input type="text" class="form-control" name="year[]" value="{{ terrain.year }}"></td>
                                         <td><input type="text" class="form-control" name="description[]" value="{{ terrain.description }}"></td>
                                         <td><input type="text" class="form-control" name="terrain_type[]" value="{{ terrain.terrain_type }}"></td>
                                         <td><input type="text" class="form-control" name="surface[]" value="{{ terrain.surface }}"></td>
+                                        <td><input type="text" class="form-control" name="year[]" value="{{ terrain.year }}"></td>
+                                        <td><input type="text" class="form-control" name="latitude[]" value="{{ terrain.latitude }}"></td>
+                                        <td><input type="text" class="form-control" name="longitude[]" value="{{ terrain.longitude }}"></td>
                                         <td>
                                             <div class="terrain-plot-links">
                                                 {% if terrain.plot_ids %}
@@ -262,12 +262,12 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             var row = document.createElement("tr");
-            row.appendChild(createInputCell("Latitudine", "latitude[]"));
-            row.appendChild(createInputCell("Longitudine", "longitude[]"));
-            row.appendChild(createInputCell("Anno", "year[]"));
             row.appendChild(createInputCell("Descrizione", "description[]"));
             row.appendChild(createInputCell("Tipo terreno", "terrain_type[]"));
             row.appendChild(createInputCell("Estensione", "surface[]"));
+            row.appendChild(createInputCell("Anno", "year[]"));
+            row.appendChild(createInputCell("Latitudine", "latitude[]"));
+            row.appendChild(createInputCell("Longitudine", "longitude[]"));
             row.appendChild(createPlotLinksCell());
             row.appendChild(createActionCell());
             tbody.appendChild(row);

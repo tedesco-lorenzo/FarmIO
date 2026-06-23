@@ -102,8 +102,8 @@
                                         <tr>
                                             <th>Marca <span class="farmio-required-star">*</span></th>
                                             <th>Modello <span class="farmio-required-star">*</span></th>
-                                            <th>Anno <span class="farmio-required-star">*</span></th>
                                             <th>{{ extra_column_label }}{% if extra_required %} <span class="farmio-required-star">*</span>{% endif %}</th>
+                                            <th>Anno <span class="farmio-required-star">*</span></th>
                                             <th>Prezzo <span class="farmio-required-star">*</span></th>
                                             <th class="text-center">Azioni</th>
                                         </tr>
@@ -116,9 +116,16 @@
                                                 <input type="text" class="form-control" name="brand[]" value="{{ resource.brand }}">
                                             </td>
                                             <td><input type="text" class="form-control" name="model[]" value="{{ resource.model }}"></td>
-                                            <td><input type="text" class="form-control" name="year[]" value="{{ resource.year }}"></td>
                                             <td><input type="text" class="form-control" name="extra_value[]" value="{{ resource.quantity if resource_type == 'attrezzature' else resource.plate }}"></td>
-                                            <td><input type="text" class="form-control" name="price[]" value="{{ resource.price }}"></td>
+                                            <td><input type="text" class="form-control" name="year[]" value="{{ resource.year }}"></td>
+                                            <td>
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">€</span>
+                                                    </div>
+                                                    <input type="text" class="form-control" name="price[]" value="{{ resource.price }}">
+                                                </div>
+                                            </td>
                                             <td class="text-center">
                                                 <div class="table-actions">
                                                     <button type="button" class="delete-row-button" data-remove-resource-row title="Rimuovi riga" aria-label="Rimuovi riga">
@@ -183,6 +190,31 @@ document.addEventListener("DOMContentLoaded", function () {
         return cell;
     }
 
+    function createCurrencyCell(inputName, placeholderText) {
+        var cell = document.createElement("td");
+        var group = document.createElement("div");
+        group.className = "input-group";
+
+        var prepend = document.createElement("div");
+        prepend.className = "input-group-prepend";
+
+        var symbol = document.createElement("span");
+        symbol.className = "input-group-text";
+        symbol.textContent = "€";
+
+        var input = document.createElement("input");
+        input.type = "text";
+        input.className = "form-control";
+        input.name = inputName;
+        input.placeholder = placeholderText;
+
+        prepend.appendChild(symbol);
+        group.appendChild(prepend);
+        group.appendChild(input);
+        cell.appendChild(group);
+        return cell;
+    }
+
     function createActionCell() {
         var cell = document.createElement("td");
         cell.className = "text-center";
@@ -238,9 +270,9 @@ document.addEventListener("DOMContentLoaded", function () {
             var row = document.createElement("tr");
             row.appendChild(createInputCell("brand[]", "Marca", "resource_id[]"));
             row.appendChild(createInputCell("model[]", "Modello"));
-            row.appendChild(createInputCell("year[]", "Anno"));
             row.appendChild(createInputCell("extra_value[]", table.dataset.extraLabel || ""));
-            row.appendChild(createInputCell("price[]", "Prezzo"));
+            row.appendChild(createInputCell("year[]", "Anno"));
+            row.appendChild(createCurrencyCell("price[]", "Prezzo"));
             row.appendChild(createActionCell());
             tbody.appendChild(row);
 

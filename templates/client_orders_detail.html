@@ -34,14 +34,6 @@
                     <div class="col-xl-4 col-md-6 mb-4">
                         <div class="card border-left-success shadow h-100 py-2">
                             <div class="card-body">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-2">Email</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ client.email }}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-md-6 mb-4">
-                        <div class="card border-left-success shadow h-100 py-2">
-                            <div class="card-body">
                                 <div class="text-xs font-weight-bold text-success text-uppercase mb-2">Indirizzo</div>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800">{{ client.address }}</div>
                             </div>
@@ -74,26 +66,30 @@
                             <table class="table table-bordered table-hover farmio-data-table">
                                 <thead>
                                     <tr>
+                                        <th>Punto vendita</th>
+                                        <th>Data</th>
+                                        <th>Totale</th>
                                         {% if client.channel_label == 'Online' %}
                                         <th>Indirizzo</th>
                                         {% endif %}
                                         <th>P. IVA</th>
-                                        <th>Data</th>
-                                        <th>Totale</th>
-                                        <th>Email</th>
                                         <th class="text-center">Dettaglio</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for order in client.orders %}
                                     <tr>
+                                        <td>
+                                            <a class="font-weight-bold text-success" href="{{ url_for('punto_vendita_gestione', point_vat=order.point_vat) }}">
+                                                {{ order.point_name }}
+                                            </a>
+                                        </td>
+                                        <td>{{ order.date }}</td>
+                                        <td>{{ order.total }}</td>
                                         {% if client.channel_label == 'Online' %}
                                         <td>{{ order.client_address }}</td>
                                         {% endif %}
                                         <td>{{ order.client_vat or '-' }}</td>
-                                        <td>{{ order.date }}</td>
-                                        <td>{{ order.total }}</td>
-                                        <td>{{ order.company_email }}</td>
                                         <td class="text-center">
                                             <a class="btn btn-sm btn-outline-success" href="{% if client.channel_label == 'Online' %}{{ url_for('punto_vendita_online_ordine', order_id=order.order_id) }}{% else %}{{ url_for('punto_vendita_fisico_ordine', order_id=order.order_id) }}{% endif %}">
                                                 Apri

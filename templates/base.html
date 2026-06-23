@@ -58,6 +58,25 @@
             box-shadow: none;
         }
 
+        .farmio-data-table .input-group {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: stretch;
+            min-width: 170px;
+        }
+
+        .farmio-data-table .input-group .form-control {
+            min-width: 0;
+            width: 1%;
+            flex: 1 1 auto;
+        }
+
+        .farmio-data-table .input-group-text {
+            white-space: nowrap;
+            min-width: 46px;
+            justify-content: center;
+        }
+
         .farmio-data-table .form-control:focus {
             border-color: #7cc4a6;
             box-shadow: 0 0 0 0.15rem rgba(28, 200, 138, 0.12);
@@ -189,7 +208,9 @@ window.FarmIOTableLock = function (config) {
 
     var lockButton = typeof config.lockButton === "string" ? document.querySelector(config.lockButton) : config.lockButton;
     var unlockButton = typeof config.unlockButton === "string" ? document.querySelector(config.unlockButton) : config.unlockButton;
-    var addButtons = Array.from(document.querySelectorAll(config.addButtonsSelector || ""));
+    var addButtons = config.addButtonsSelector
+        ? Array.from(document.querySelectorAll(config.addButtonsSelector))
+        : [];
     var removeButtonsSelector = config.removeButtonsSelector || "";
     var state = { locked: false };
 
@@ -276,7 +297,7 @@ window.FarmIOTableLock = function (config) {
         if (lockButton) {
             lockButton.classList.remove("d-none");
         }
-        if (unlockButton) {
+        if (unlockButton && !config.keepUnlockVisible) {
             unlockButton.classList.add("d-none");
         }
 
@@ -291,7 +312,11 @@ window.FarmIOTableLock = function (config) {
 
     if (unlockButton) {
         unlockButton.addEventListener("click", unlockTable);
-        unlockButton.classList.add("d-none");
+        if (!config.keepUnlockVisible) {
+            unlockButton.classList.add("d-none");
+        } else {
+            unlockButton.classList.remove("d-none");
+        }
     }
 
     if (config.initiallyLocked !== false) {

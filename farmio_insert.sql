@@ -42,12 +42,63 @@ INSERT INTO TERRENO_AGRICOLO (
 INSERT INTO COLTURA (varieta, specie, descrizione) VALUES
 ('Chianti', 'Vite', 'Uva da vino rosso DOCG'),
 ('Vermentino', 'Vite', 'Uva a bacca bianca aromatica'),
+('Sangiovese', 'Vite', 'Vite tipica del centro Italia'),
+('Montepulciano', 'Vite', 'Vite da vino rosso intenso'),
+('Trebbiano', 'Vite', 'Vite bianca molto diffusa'),
 ('Frantoio', 'Olivo', 'Cultivar per olio extravergine'),
 ('Leccino', 'Olivo', 'Cultivar rustica ad alta resa'),
+('Moraiolo', 'Olivo', 'Olivo adatto a zone collinari'),
+('Pendolino', 'Olivo', 'Olivo spesso usato come impollinatore'),
 ('San Marzano', 'Pomodoro', 'Pomodoro da industria e conserva'),
 ('Datterino', 'Pomodoro', 'Pomodoro da mensa dolce'),
+('Cuore di Bue', 'Pomodoro', 'Pomodoro grosso da insalata'),
+('Ciliegino', 'Pomodoro', 'Pomodoro piccolo da tavola'),
 ('Romanesco', 'Zucchino', 'Zucchino verde chiaro'),
-('Lattuga Gentile', 'Lattuga', 'Insalata da taglio');
+('Nero di Milano', 'Zucchino', 'Zucchino scuro'),
+('Striato d Italia', 'Zucchino', 'Zucchino striato'),
+('Lattuga Gentile', 'Lattuga', 'Insalata da taglio'),
+('Romana', 'Lattuga', 'Lattuga allungata e croccante'),
+('Iceberg', 'Lattuga', 'Lattuga compatta da insalata'),
+('Gala', 'Mela', 'Mela rossa dolce e croccante'),
+('Golden Delicious', 'Mela', 'Mela gialla molto diffusa'),
+('Fuji', 'Mela', 'Mela dolce e succosa'),
+('Granny Smith', 'Mela', 'Mela verde dal gusto acidulo'),
+('William', 'Pera', 'Pera estiva molto comune'),
+('Abate Fetel', 'Pera', 'Pera allungata e zuccherina'),
+('Conference', 'Pera', 'Pera rustica e produttiva'),
+('Navelina', 'Arancia', 'Arancia da tavola precoce'),
+('Tarocco', 'Arancia', 'Arancia rossa siciliana'),
+('Moro', 'Arancia', 'Arancia rossa intensa'),
+('Femminello', 'Limone', 'Limone molto diffuso in Italia'),
+('Interdonato', 'Limone', 'Limone precoce e profumato'),
+('Nantes', 'Carota', 'Carota cilindrica e dolce'),
+('Chantenay', 'Carota', 'Carota conica di pezzatura media'),
+('Aglio Bianco Polesano', 'Aglio', 'Aglio bianco aromatico'),
+('Rosso di Sulmona', 'Aglio', 'Aglio rosso dal sapore intenso'),
+('Bianca di Maggio', 'Cipolla', 'Cipolla bianca precoce'),
+('Rossa di Tropea', 'Cipolla', 'Cipolla rossa dolce'),
+('Dorata di Parma', 'Cipolla', 'Cipolla dorata da conservazione'),
+('Patata Novella', 'Patata', 'Patata precoce da consumo fresco'),
+('Desiree', 'Patata', 'Patata a buccia rossa'),
+('Spunta', 'Patata', 'Patata da resa elevata'),
+('Senatore Cappelli', 'Grano', 'Grano duro antico'),
+('Saragolla', 'Grano', 'Grano duro rustico'),
+('Claudio', 'Grano', 'Grano duro adatto alla pasta'),
+('Arborio', 'Riso', 'Riso da risotti'),
+('Carnaroli', 'Riso', 'Riso da risotto di qualità'),
+('Vialone Nano', 'Riso', 'Riso semifino molto usato'),
+('Borlotto', 'Fagiolo', 'Fagiolo da granella molto diffuso'),
+('Cannellino', 'Fagiolo', 'Fagiolo bianco tenero'),
+('Calabrese', 'Broccolo', 'Broccolo verde da consumo fresco'),
+('Romanesco', 'Broccolo', 'Broccolo con infiorescenza geometrica'),
+('Violetto di Sicilia', 'Melanzana', 'Melanzana violetta'),
+('Nera Tonda', 'Melanzana', 'Melanzana tonda scura'),
+('Quadrato d Asti', 'Peperone', 'Peperone grande e carnoso'),
+('Corno di Toro', 'Peperone', 'Peperone lungo e dolce'),
+('Hayward', 'Kiwi', 'Kiwi verde molto diffuso'),
+('Soreli', 'Kiwi', 'Kiwi a polpa gialla'),
+('Chandler', 'Noce', 'Noce da frutto produttiva'),
+('Tonda Gentile', 'Nocciolo', 'Nocciola di pregio');
 
 -- 5. SOGGETTO
 INSERT INTO SOGGETTO (
@@ -80,13 +131,27 @@ INSERT INTO REGISTRAZIONE_ORE (email_azienda_agricola, id_soggetto, data, ore) V
 ('info@verdemurlo.it', 1, '2026-06-17', 8.00),
 ('info@verdemurlo.it', 2, '2026-06-17', 7.50),
 ('info@verdemurlo.it', 3, '2026-06-17', 6.00),
+('info@verdemurlo.it', 1, '2026-06-18', 7.50),
 ('info@verdemurlo.it', 2, '2026-06-18', 8.00),
 ('info@verdemurlo.it', 3, '2026-06-18', 7.00),
+('info@verdemurlo.it', 1, '2026-06-19', 8.00),
+('info@verdemurlo.it', 2, '2026-06-19', 7.25),
+('info@verdemurlo.it', 3, '2026-06-19', 6.50),
+('info@verdemurlo.it', 1, '2026-06-20', 5.50),
+('info@verdemurlo.it', 2, '2026-06-20', 6.00),
+('info@verdemurlo.it', 3, '2026-06-20', 6.75),
 ('amministrazione@bioroma.it', 1, '2026-06-17', 8.00),
 ('amministrazione@bioroma.it', 2, '2026-06-17', 7.00),
 ('amministrazione@bioroma.it', 3, '2026-06-17', 7.50),
+('amministrazione@bioroma.it', 1, '2026-06-18', 7.50),
 ('amministrazione@bioroma.it', 2, '2026-06-18', 8.00),
-('amministrazione@bioroma.it', 3, '2026-06-18', 8.00);
+('amministrazione@bioroma.it', 3, '2026-06-18', 8.00),
+('amministrazione@bioroma.it', 1, '2026-06-19', 8.00),
+('amministrazione@bioroma.it', 2, '2026-06-19', 7.75),
+('amministrazione@bioroma.it', 3, '2026-06-19', 7.25),
+('amministrazione@bioroma.it', 1, '2026-06-20', 6.50),
+('amministrazione@bioroma.it', 2, '2026-06-20', 7.00),
+('amministrazione@bioroma.it', 3, '2026-06-20', 6.75);
 
 -- 7. RISORSA MATERIALE
 INSERT INTO RISORSA_MATERIALE (
@@ -119,7 +184,13 @@ INSERT INTO SCHEDA_MANUTENZIONE (id_risorsa_materiale, id_manutenzione, data, co
 (3, 103, '2026-05-12', 120.00, 'Sostituzione ugelli atomizzatore'),
 (6, 104, '2026-02-18', 980.00, 'Tagliando completo trattore'),
 (7, 105, '2026-04-27', 510.00, 'Sostituzione batteria e luci'),
-(10, 106, '2026-05-30', 260.00, 'Affilatura coltelli trincia');
+(10, 106, '2026-05-30', 260.00, 'Affilatura coltelli trincia'),
+(4, 107, '2026-06-04', 85.00, 'Lubrificazione e controllo forbici elettriche'),
+(5, 108, '2026-06-06', 140.00, 'Sostituzione cassette danneggiate'),
+(8, 109, '2026-06-01', 65.00, 'Verifica motore e lame zappa'),
+(9, 110, '2026-06-03', 95.00, 'Controllo raccordi kit irrigazione'),
+(1, 111, '2026-06-08', 310.00, 'Controllo pneumatici e freni trattore'),
+(6, 112, '2026-06-09', 420.00, 'Sostituzione filtri e ingrassaggio generale');
 
 -- 9. APPEZZAMENTO
 INSERT INTO APPEZZAMENTO (
@@ -166,7 +237,15 @@ INSERT INTO INTERVENTO_OPERATIVO (data_ora_inizio, data_ora_fine, descrizione, i
 ('2026-06-18 07:00:00', '2026-06-18 11:30:00', 'Trinciatura interfila e manutenzione campo', 6),
 ('2026-06-19 08:00:00', '2026-06-19 12:00:00', 'Scacchiatura e tutoraggio pomodoro datterino', 10),
 ('2026-06-19 06:30:00', '2026-06-19 10:30:00', 'Raccolta selettiva San Marzano', 11),
-('2026-06-19 07:10:00', '2026-06-19 09:00:00', 'Trapianto lattuga e controllo irrigazione', 12);
+('2026-06-19 07:10:00', '2026-06-19 09:00:00', 'Trapianto lattuga e controllo irrigazione', 12),
+('2026-06-21 06:50:00', '2026-06-21 09:40:00', 'Controllo maturazione e campionamento uva', 1),
+('2026-06-21 07:00:00', '2026-06-21 10:00:00', 'Potatura di contenimento oliveto', 2),
+('2026-06-21 06:40:00', '2026-06-21 08:20:00', 'Raccolta lattuga mattutina', 3),
+('2026-06-22 07:15:00', '2026-06-22 10:10:00', 'Controllo irrigazione e sfogliatura vigneto', 14),
+('2026-06-20 06:20:00', '2026-06-20 09:10:00', 'Raccolta pomodoro e selezione cassette', 5),
+('2026-06-20 07:40:00', '2026-06-20 11:00:00', 'Controllo infestanti e trinciatura campo', 6),
+('2026-06-21 08:10:00', '2026-06-21 12:00:00', 'Raccolta datterino e preparazione ordini', 10),
+('2026-06-21 07:30:00', '2026-06-21 09:30:00', 'Raccolta lattuga e reintegro impianto', 12);
 
 -- 11. ASSEGNAZIONE
 INSERT INTO ASSEGNAZIONE (id_appezzamento, data_ora_inizio_intervento_operativo, email_azienda_agricola, id_soggetto) VALUES
@@ -195,7 +274,22 @@ INSERT INTO ASSEGNAZIONE (id_appezzamento, data_ora_inizio_intervento_operativo,
 (11, '2026-06-19 06:30:00', 'amministrazione@bioroma.it', 3),
 (11, '2026-06-19 06:30:00', 'amministrazione@bioroma.it', 4),
 (12, '2026-06-19 07:10:00', 'amministrazione@bioroma.it', 2),
-(12, '2026-06-19 07:10:00', 'amministrazione@bioroma.it', 5);
+(12, '2026-06-19 07:10:00', 'amministrazione@bioroma.it', 5),
+(1, '2026-06-21 06:50:00', 'info@verdemurlo.it', 1),
+(1, '2026-06-21 06:50:00', 'info@verdemurlo.it', 2),
+(2, '2026-06-21 07:00:00', 'info@verdemurlo.it', 2),
+(2, '2026-06-21 07:00:00', 'info@verdemurlo.it', 4),
+(3, '2026-06-21 06:40:00', 'info@verdemurlo.it', 3),
+(14, '2026-06-22 07:15:00', 'info@verdemurlo.it', 1),
+(14, '2026-06-22 07:15:00', 'info@verdemurlo.it', 3),
+(5, '2026-06-20 06:20:00', 'amministrazione@bioroma.it', 2),
+(5, '2026-06-20 06:20:00', 'amministrazione@bioroma.it', 3),
+(6, '2026-06-20 07:40:00', 'amministrazione@bioroma.it', 1),
+(6, '2026-06-20 07:40:00', 'amministrazione@bioroma.it', 4),
+(10, '2026-06-21 08:10:00', 'amministrazione@bioroma.it', 1),
+(10, '2026-06-21 08:10:00', 'amministrazione@bioroma.it', 2),
+(12, '2026-06-21 07:30:00', 'amministrazione@bioroma.it', 2),
+(12, '2026-06-21 07:30:00', 'amministrazione@bioroma.it', 5);
 
 -- 12. UTILIZZO
 INSERT INTO UTILIZZO (id_risorsa_materiale, id_appezzamento, data_ora_inizio_intervento_operativo) VALUES
@@ -222,7 +316,19 @@ INSERT INTO UTILIZZO (id_risorsa_materiale, id_appezzamento, data_ora_inizio_int
 (8, 10, '2026-06-19 08:00:00'),
 (7, 11, '2026-06-19 06:30:00'),
 (8, 11, '2026-06-19 06:30:00'),
-(9, 12, '2026-06-19 07:10:00');
+(9, 12, '2026-06-19 07:10:00'),
+(1, 1, '2026-06-21 06:50:00'),
+(3, 1, '2026-06-21 06:50:00'),
+(4, 2, '2026-06-21 07:00:00'),
+(5, 3, '2026-06-21 06:40:00'),
+(1, 14, '2026-06-22 07:15:00'),
+(4, 14, '2026-06-22 07:15:00'),
+(9, 5, '2026-06-20 06:20:00'),
+(7, 6, '2026-06-20 07:40:00'),
+(10, 6, '2026-06-20 07:40:00'),
+(6, 10, '2026-06-21 08:10:00'),
+(8, 10, '2026-06-21 08:10:00'),
+(9, 12, '2026-06-21 07:30:00');
 
 -- 13. IRRIGAZIONE
 INSERT INTO IRRIGAZIONE (data, ora_inizio, nome_prodotto, quantita_prodotto, id_appezzamento) VALUES
@@ -239,7 +345,15 @@ INSERT INTO IRRIGAZIONE (data, ora_inizio, nome_prodotto, quantita_prodotto, id_
 ('2026-06-18', '06:00:00', NULL, NULL, 6),
 ('2026-06-17', '05:30:00', 'Potassio liquido', 7.00, 10),
 ('2026-06-18', '06:10:00', 'NPK Bio', 9.50, 11),
-('2026-06-19', '05:50:00', NULL, NULL, 12);
+('2026-06-19', '05:50:00', NULL, NULL, 12),
+('2026-06-20', '20:40:00', 'Biostimolante vite', 7.50, 1),
+('2026-06-20', '06:05:00', NULL, NULL, 2),
+('2026-06-21', '05:50:00', 'Fertirrigante lattuga', 3.20, 3),
+('2026-06-21', '20:30:00', NULL, NULL, 7),
+('2026-06-20', '05:35:00', 'Calcio liquido', 5.80, 5),
+('2026-06-20', '06:15:00', NULL, NULL, 6),
+('2026-06-21', '05:25:00', 'Potassio liquido', 6.50, 10),
+('2026-06-22', '06:00:00', 'Fertirrigante fogliare', 2.80, 12);
 
 -- 14. TRATTAMENTO
 INSERT INTO TRATTAMENTO (data, quantita_acqua, nome_prodotto, quantita_prodotto, id_appezzamento) VALUES
@@ -256,16 +370,30 @@ INSERT INTO TRATTAMENTO (data, quantita_acqua, nome_prodotto, quantita_prodotto,
 ('2026-06-07', 350.00, 'Antioidico bio', 7.50, 6),
 ('2026-05-28', 300.00, 'Estratto equiseto', 8.00, 10),
 ('2026-06-04', 360.00, 'Rame bio', 9.00, 11),
-('2026-06-10', 110.00, 'Sapone potassico', 3.50, 12);
+('2026-06-10', 110.00, 'Sapone potassico', 3.50, 12),
+('2026-06-12', 480.00, 'Estratto propoli', 7.00, 1),
+('2026-06-13', 300.00, 'Zeolite micronizzata', 6.50, 2),
+('2026-06-14', 150.00, 'Macerato aglio', 4.50, 3),
+('2026-06-11', 360.00, 'Rame leggero', 8.40, 7),
+('2026-06-12', 220.00, 'Calcio fogliare', 5.20, 5),
+('2026-06-13', 310.00, 'Sapone molle', 6.80, 6),
+('2026-06-14', 260.00, 'Bicarbonato potassio', 5.60, 10),
+('2026-06-15', 100.00, 'Estratto algale', 2.90, 12);
 
 -- 15. SCORTA
 INSERT INTO SCORTA (email_azienda_agricola, anno, varieta_coltura, specie_coltura, quantita_totale, prezzo_unitario) VALUES
+('info@verdemurlo.it', 2024, 'Chianti', 'Vite', 4800.00, 1.10),
+('info@verdemurlo.it', 2024, 'Vermentino', 'Vite', 2750.00, 1.28),
+('info@verdemurlo.it', 2024, 'Frantoio', 'Olivo', 1320.00, 8.20),
 ('info@verdemurlo.it', 2025, 'Chianti', 'Vite', 5200.00, 1.20),
 ('info@verdemurlo.it', 2025, 'Vermentino', 'Vite', 3100.00, 1.35),
 ('info@verdemurlo.it', 2025, 'Frantoio', 'Olivo', 1450.00, 8.50),
 ('info@verdemurlo.it', 2025, 'Leccino', 'Olivo', 980.00, 8.10),
 ('info@verdemurlo.it', 2026, 'Lattuga Gentile', 'Lattuga', 680.00, 1.90),
 ('info@verdemurlo.it', 2026, 'Romanesco', 'Zucchino', 540.00, 1.60),
+('amministrazione@bioroma.it', 2025, 'San Marzano', 'Pomodoro', 760.00, 0.60),
+('amministrazione@bioroma.it', 2025, 'Datterino', 'Pomodoro', 540.00, 1.05),
+('amministrazione@bioroma.it', 2025, 'Romanesco', 'Zucchino', 850.00, 1.35),
 ('amministrazione@bioroma.it', 2026, 'San Marzano', 'Pomodoro', 800.00, 0.65),
 ('amministrazione@bioroma.it', 2026, 'Datterino', 'Pomodoro', 620.00, 1.10),
 ('amministrazione@bioroma.it', 2026, 'Romanesco', 'Zucchino', 910.00, 1.45),
@@ -273,6 +401,9 @@ INSERT INTO SCORTA (email_azienda_agricola, anno, varieta_coltura, specie_coltur
 
 -- 16. RACCOLTA
 INSERT INTO RACCOLTA (data, id_appezzamento, quantita_raccolta, anno_scorta, email_azienda_agricola, varieta_coltura, specie_coltura) VALUES
+('2024-09-18', 1, 4800.00, 2024, 'info@verdemurlo.it', 'Chianti', 'Vite'),
+('2024-09-27', 7, 2750.00, 2024, 'info@verdemurlo.it', 'Vermentino', 'Vite'),
+('2024-11-03', 2, 1320.00, 2024, 'info@verdemurlo.it', 'Frantoio', 'Olivo'),
 ('2025-09-20', 1, 5200.00, 2025, 'info@verdemurlo.it', 'Chianti', 'Vite'),
 ('2025-09-28', 7, 3100.00, 2025, 'info@verdemurlo.it', 'Vermentino', 'Vite'),
 ('2025-10-02', 13, 2100.00, 2025, 'info@verdemurlo.it', 'Chianti', 'Vite'),
@@ -281,6 +412,9 @@ INSERT INTO RACCOLTA (data, id_appezzamento, quantita_raccolta, anno_scorta, ema
 ('2025-11-09', 8, 980.00, 2025, 'info@verdemurlo.it', 'Leccino', 'Olivo'),
 ('2026-06-15', 3, 680.00, 2026, 'info@verdemurlo.it', 'Lattuga Gentile', 'Lattuga'),
 ('2026-06-16', 9, 540.00, 2026, 'info@verdemurlo.it', 'Romanesco', 'Zucchino'),
+('2025-08-28', 4, 760.00, 2025, 'amministrazione@bioroma.it', 'San Marzano', 'Pomodoro'),
+('2025-09-03', 5, 540.00, 2025, 'amministrazione@bioroma.it', 'Datterino', 'Pomodoro'),
+('2025-09-15', 6, 850.00, 2025, 'amministrazione@bioroma.it', 'Romanesco', 'Zucchino'),
 ('2026-06-15', 4, 850.00, 2026, 'amministrazione@bioroma.it', 'San Marzano', 'Pomodoro'),
 ('2026-06-16', 5, 620.00, 2026, 'amministrazione@bioroma.it', 'Datterino', 'Pomodoro'),
 ('2026-06-17', 6, 910.00, 2026, 'amministrazione@bioroma.it', 'Romanesco', 'Zucchino'),
@@ -292,8 +426,12 @@ INSERT INTO RACCOLTA (data, id_appezzamento, quantita_raccolta, anno_scorta, ema
 INSERT INTO PUNTO_VENDITA (partita_iva, email_azienda_agricola, nome, indirizzo, orari_apertura, negozio_fisico, online) VALUES
 ('01111111111', 'info@verdemurlo.it', 'Bottega della Vite', 'Via del Campo 12, Firenze', '09:00-19:00', 1, 0),
 ('01111111112', 'info@verdemurlo.it', 'Verde Murlo Shop', 'https://shop.verdemurlo.it', '24/7 online', 0, 1),
+('01111111113', 'info@verdemurlo.it', 'Cantina Murlo Centro', 'Piazza del Vino 4, Firenze', '10:00-18:30', 1, 0),
+('01111111114', 'info@verdemurlo.it', 'Murlo e-Shop Pro', 'https://pro.verdemurlo.it', '24/7 online', 0, 1),
 ('03333333333', 'amministrazione@bioroma.it', 'BioRoma Store Online', 'https://shop.bioroma.it', '24/7 online', 0, 1),
-('03333333334', 'amministrazione@bioroma.it', 'Mercato BioRoma', 'Via Appia Nuova 88, Roma', '08:30-18:30', 1, 0);
+('03333333334', 'amministrazione@bioroma.it', 'Mercato BioRoma', 'Via Appia Nuova 88, Roma', '08:30-18:30', 1, 0),
+('03333333335', 'amministrazione@bioroma.it', 'BioRoma Trastevere', 'Via Trastevere 22, Roma', '09:00-19:30', 1, 0),
+('03333333336', 'amministrazione@bioroma.it', 'BioRoma Ordini Web', 'https://ordini.bioroma.it', '24/7 online', 0, 1);
 
 -- 18. CLIENTE
 INSERT INTO CLIENTE (id_cliente, nome, cognome, indirizzo, email, partita_iva, metodo_pagamento) VALUES
@@ -302,7 +440,13 @@ INSERT INTO CLIENTE (id_cliente, nome, cognome, indirizzo, email, partita_iva, m
 (3, 'Marta', 'Neri', 'Via Gioberti 14, Firenze', 'marta.neri@gmail.com', NULL, 'Carta di Credito'),
 (4, 'Ristorante Da Mimmo', 'Esposito', 'Piazza Navona 3, Roma', 'info@damimmo.it', '09876543210', 'Bonifico'),
 (5, 'Paolo', 'Seri', 'Via Tiburtina 120, Roma', 'paolo.seri@gmail.com', NULL, 'PayPal'),
-(6, 'Market Verde', 'Bassi', 'Via Salaria 45, Roma', 'acquisti@marketverde.it', '05432167890', 'Bonifico');
+(6, 'Market Verde', 'Bassi', 'Via Salaria 45, Roma', 'acquisti@marketverde.it', '05432167890', 'Bonifico'),
+(7, 'Laura', 'Gori', 'Via Senese 40, Firenze', 'laura.gori@gmail.com', NULL, 'Carta di Credito'),
+(8, 'Enoteca Colli', 'Ricci', 'Via del Vino 8, Firenze', 'ordini@enotecacolli.it', '06789012345', 'Bonifico'),
+(9, 'Stefano', 'Villa', 'Via Nomentana 80, Roma', 'stefano.villa@gmail.com', NULL, 'Carta di Credito'),
+(10, 'Ortofrutta Centro', 'Mancini', 'Via Tuscolana 14, Roma', 'acquisti@ortofruttacentro.it', '02345098761', 'Bonifico'),
+(11, 'Chiara', 'Donati', 'Via Bolognese 99, Firenze', 'chiara.donati@gmail.com', NULL, 'PayPal'),
+(12, 'Gastronomia Verde', 'Landi', 'Via Appia 56, Roma', 'ordini@gastronomiaverde.it', '01928374655', 'Bonifico');
 
 -- 19. ORDINE
 INSERT INTO ORDINE (id_ordine, data, totale_ordine, id_cliente, partita_iva_punto_vendita) VALUES
@@ -311,7 +455,19 @@ INSERT INTO ORDINE (id_ordine, data, totale_ordine, id_cliente, partita_iva_punt
 (3, '2026-06-18', 58.50, 3, '01111111112'),
 (4, '2026-06-17', 32.50, 4, '03333333333'),
 (5, '2026-06-18', 71.00, 5, '03333333333'),
-(6, '2026-06-18', 188.40, 6, '03333333334');
+(6, '2026-06-18', 188.40, 6, '03333333334'),
+(7, '2026-06-19', 64.80, 2, '01111111113'),
+(8, '2026-06-19', 40.50, 3, '01111111112'),
+(9, '2026-06-20', 57.00, 7, '01111111114'),
+(10, '2026-06-20', 16.00, 8, '01111111111'),
+(11, '2026-06-19', 44.00, 4, '03333333336'),
+(12, '2026-06-20', 58.00, 5, '03333333334'),
+(13, '2026-06-20', 97.50, 9, '03333333335'),
+(14, '2026-06-21', 35.00, 10, '03333333333'),
+(15, '2026-06-21', 81.00, 11, '01111111113'),
+(16, '2026-06-22', 87.00, 12, '03333333334'),
+(17, '2026-06-22', 25.60, 1, '01111111114'),
+(18, '2026-06-22', 52.50, 6, '03333333335');
 
 -- 20. PRELIEVO
 INSERT INTO PRELIEVO (varieta_coltura, specie_coltura, anno_scorta, email_azienda_agricola, id_ordine, quantita_prodotto_ordine) VALUES
@@ -320,4 +476,16 @@ INSERT INTO PRELIEVO (varieta_coltura, specie_coltura, anno_scorta, email_aziend
 ('Lattuga Gentile', 'Lattuga', 2026, 'info@verdemurlo.it', 3, 30.00),
 ('San Marzano', 'Pomodoro', 2026, 'amministrazione@bioroma.it', 4, 50.00),
 ('Datterino', 'Pomodoro', 2026, 'amministrazione@bioroma.it', 5, 40.00),
-('Romanesco', 'Zucchino', 2026, 'amministrazione@bioroma.it', 6, 96.00);
+('Romanesco', 'Zucchino', 2026, 'amministrazione@bioroma.it', 6, 96.00),
+('Leccino', 'Olivo', 2025, 'info@verdemurlo.it', 7, 8.00),
+('Vermentino', 'Vite', 2025, 'info@verdemurlo.it', 8, 30.00),
+('Lattuga Gentile', 'Lattuga', 2026, 'info@verdemurlo.it', 9, 30.00),
+('Romanesco', 'Zucchino', 2026, 'info@verdemurlo.it', 10, 10.00),
+('Datterino', 'Pomodoro', 2026, 'amministrazione@bioroma.it', 11, 40.00),
+('Romanesco', 'Zucchino', 2026, 'amministrazione@bioroma.it', 12, 40.00),
+('San Marzano', 'Pomodoro', 2026, 'amministrazione@bioroma.it', 13, 150.00),
+('Lattuga Gentile', 'Lattuga', 2026, 'amministrazione@bioroma.it', 14, 20.00),
+('Vermentino', 'Vite', 2025, 'info@verdemurlo.it', 15, 60.00),
+('Romanesco', 'Zucchino', 2026, 'amministrazione@bioroma.it', 16, 60.00),
+('Romanesco', 'Zucchino', 2026, 'info@verdemurlo.it', 17, 16.00),
+('Lattuga Gentile', 'Lattuga', 2026, 'amministrazione@bioroma.it', 18, 30.00);

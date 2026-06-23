@@ -157,28 +157,31 @@ def save_plot_history(plot_id, history_type):
         elif history_type == "raccolta":
             harvest_quantities = request.form.getlist("harvest_quantity[]")
             stock_years = request.form.getlist("stock_year[]")
-            crop_varieties = request.form.getlist("crop_variety[]")
-            crop_species_values = request.form.getlist("crop_species[]")
             valid_crops = {(crop.varieta, crop.specie) for crop in Coltura.query.all()}
-            submitted_rows = list(
-                zip(dates, harvest_quantities, stock_years, crop_varieties, crop_species_values)
-            )
+            crop_variety = plot.varieta_coltura
+            crop_species = plot.specie_coltura
+            submitted_rows = list(zip(dates, harvest_quantities, stock_years))
             validated_records = []
             seen_dates = set()
 
-            for date_raw, quantity_raw, year_raw, variety_raw, species_raw in submitted_rows:
+            if (crop_variety, crop_species) not in valid_crops:
+                flash(
+                    "La coltura collegata all'appezzamento non è valida. Controlla varietà e specie dell'appezzamento.",
+                    "danger",
+                )
+                return redirect(url_for("appezzamento_raccolta", plot_id=plot_id))
+
+            for date_raw, quantity_raw, year_raw in submitted_rows:
                 date_raw = (date_raw or "").strip()
                 quantity_raw = (quantity_raw or "").strip().replace(",", ".")
                 year_raw = (year_raw or "").strip()
-                crop_variety = (variety_raw or "").strip()
-                crop_species = (species_raw or "").strip()
 
-                if not any([date_raw, quantity_raw, year_raw, crop_variety, crop_species]):
+                if not any([date_raw, quantity_raw, year_raw]):
                     continue
 
-                if not all([date_raw, quantity_raw, year_raw, crop_variety, crop_species]):
+                if not all([date_raw, quantity_raw, year_raw]):
                     flash(
-                        "Ogni raccolta deve avere data, quantità, anno scorta, varietà e specie.",
+                        "Ogni raccolta deve avere data, quantità e anno scorta.",
                         "danger",
                     )
                     return redirect(url_for("appezzamento_raccolta", plot_id=plot_id))
@@ -193,13 +196,6 @@ def save_plot_history(plot_id, history_type):
                     stock_year = int(year_raw)
                 except (InvalidOperation, ValueError):
                     flash("Quantità o anno scorta della raccolta non validi.", "danger")
-                    return redirect(url_for("appezzamento_raccolta", plot_id=plot_id))
-
-                if (crop_variety, crop_species) not in valid_crops:
-                    flash(
-                        "La coltura selezionata non è valida. Scegli una varietà e una specie presenti in Colture.",
-                        "danger",
-                    )
                     return redirect(url_for("appezzamento_raccolta", plot_id=plot_id))
 
                 if parsed_date in seen_dates:
@@ -383,7 +379,10 @@ def register_appezzamenti_routes(app):
                 return redirect(url_for("appezzamenti"))
 
             if (crop_variety, crop_species) not in valid_crops:
-                flash("La coltura selezionata non è valida. Scegli una varietà e una specie presenti in Colture.", "danger")
+                flash(
+                    "La coltura selezionata non è valida. Scegli una varietà e una specie presenti in Colture.",
+                    "danger",
+                )
                 return redirect(url_for("appezzamenti"))
 
             updated_plots[plot_number] = {
@@ -493,14 +492,11 @@ def register_appezzamenti_routes(app):
         history = get_plot_history(plot_id, "raccolta")
         if history is None:
             abort(404)
-        crop_selection_data = get_crop_selection_data()
         return render_template(
             "plot_history.html",
             title=f"Storico Raccolta - Appezzamento {history['plot']['id']}",
             subtitle="Visualizza, aggiungi o modifica lo storico raccolta del singolo appezzamento.",
             history=history,
-            crop_varieties=crop_selection_data["crop_varieties"],
-            crop_species_by_variety=crop_selection_data["crop_species_by_variety"],
         )
 
     @app.route("/appezzamenti/<int:plot_id>/raccolta/salva", methods=["POST"])

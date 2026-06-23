@@ -249,9 +249,9 @@ def register_soggetto_routes(app):
             title="Totale ore lavorate",
             employee_id=employee_id,
             total_hours=format_decimal(total_hours),
-            columns=["Data", "Ore", "ID"],
+            columns=["Data", "Ore"],
             rows=[
-                [format_date(time_entry.data), format_decimal(time_entry.ore), str(employee_id)]
+                [format_date(time_entry.data), format_decimal(time_entry.ore)]
                 for time_entry in time_entries
             ],
         )

@@ -99,8 +99,8 @@
                     <div class="col-xl-4 col-md-6 mb-4">
                         <div class="card border-left-success shadow h-100 py-2">
                             <div class="card-body">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-2">Varietà</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ history.plot.crop_variety }}</div>
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-2">Specie / Varietà</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ history.plot.crop_species }} / {{ history.plot.crop_variety }}</div>
                             </div>
                         </div>
                     </div>
@@ -133,11 +133,11 @@
                                             {% for column in history.columns %}
                                             <th>
                                                 {{ column }}
-                                                {% if history.history_type == "trattamenti" and column in ["Data", "Qtà acqua", "Prodotto", "Qtà prodotto"] %}
+                                                {% if history.history_type == "trattamenti" and column in ["Data", "Prodotto", "Qtà prodotto", "Qtà acqua"] %}
                                                 <span class="farmio-required-star">*</span>
                                                 {% elif history.history_type == "irrigazione" and column == "Data" %}
                                                 <span class="farmio-required-star">*</span>
-                                                {% elif history.history_type == "raccolta" and column in ["Data", "Qtà raccolta", "Anno scorta", "Varietà", "Specie"] %}
+                                                {% elif history.history_type == "raccolta" and column in ["Data", "Qtà raccolta", "Anno scorta"] %}
                                                 <span class="farmio-required-star">*</span>
                                                 {% endif %}
                                             </th>
@@ -149,9 +149,9 @@
                                         <tr>
                                             {% if history.history_type == "trattamenti" %}
                                             <td><input type="text" class="form-control" name="date[]" value="{{ row.date }}"></td>
-                                            <td><input type="text" class="form-control" name="water_quantity[]" value="{{ row.water_quantity }}"></td>
                                             <td><input type="text" class="form-control" name="product_name[]" value="{{ row.product_name }}"></td>
                                             <td><input type="text" class="form-control" name="product_quantity[]" value="{{ row.product_quantity }}"></td>
+                                            <td><input type="text" class="form-control" name="water_quantity[]" value="{{ row.water_quantity }}"></td>
                                             {% elif history.history_type == "irrigazione" %}
                                             <td><input type="text" class="form-control" name="date[]" value="{{ row.date }}"></td>
                                             <td><input type="text" class="form-control" name="start_time[]" value="{{ row.start_time }}"></td>
@@ -161,26 +161,8 @@
                                             <td><input type="text" class="form-control" name="date[]" value="{{ row.date }}"></td>
                                             <td><input type="text" class="form-control" name="harvest_quantity[]" value="{{ row.harvest_quantity }}"></td>
                                             <td><input type="text" class="form-control" name="stock_year[]" value="{{ row.stock_year }}"></td>
-                                            <td>
-                                                <select class="form-control" name="crop_variety[]">
-                                                    <option value="">Seleziona varietà</option>
-                                                    {% for crop_variety in crop_varieties %}
-                                                    <option value="{{ crop_variety }}" {% if row.crop_variety == crop_variety %}selected{% endif %}>
-                                                        {{ crop_variety }}
-                                                    </option>
-                                                    {% endfor %}
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <select class="form-control" name="crop_species[]">
-                                                    <option value="">Seleziona specie</option>
-                                                    {% for crop_species in crop_species_by_variety.get(row.crop_variety, []) %}
-                                                    <option value="{{ crop_species }}" {% if row.crop_species == crop_species %}selected{% endif %}>
-                                                        {{ crop_species }}
-                                                    </option>
-                                                    {% endfor %}
-                                                </select>
-                                            </td>
+                                            <td>{{ history.plot.crop_species }}</td>
+                                            <td>{{ history.plot.crop_variety }}</td>
                                             {% endif %}
                                             <td class="text-center">
                                                 <div class="table-actions">
@@ -229,8 +211,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!table) {
         return;
     }
-    var cropVarieties = {{ crop_varieties|default([])|tojson }};
-    var cropSpeciesByVariety = {{ crop_species_by_variety|default({})|tojson }};
+    var plotCropVariety = {{ history.plot.crop_variety|tojson }};
+    var plotCropSpecies = {{ history.plot.crop_species|tojson }};
 
     function createInputCell(inputName, value, placeholderText) {
         var cell = document.createElement("td");
@@ -244,61 +226,10 @@ document.addEventListener("DOMContentLoaded", function () {
         return cell;
     }
 
-    function fillSelectOptions(select, options, placeholderText, selectedValue) {
-        select.innerHTML = "";
-
-        var placeholderOption = document.createElement("option");
-        placeholderOption.value = "";
-        placeholderOption.textContent = placeholderText;
-        select.appendChild(placeholderOption);
-
-        options.forEach(function (optionValue) {
-            var option = document.createElement("option");
-            option.value = optionValue;
-            option.textContent = optionValue;
-            if (selectedValue === optionValue) {
-                option.selected = true;
-            }
-            select.appendChild(option);
-        });
-
-        if (!selectedValue) {
-            select.value = "";
-        }
-    }
-
-    function createSelectCell(inputName, placeholderText) {
+    function createFixedValueCell(value) {
         var cell = document.createElement("td");
-        var select = document.createElement("select");
-        select.className = "form-control";
-        select.name = inputName;
-        fillSelectOptions(select, [], placeholderText, "");
-        cell.appendChild(select);
+        cell.textContent = value || "";
         return cell;
-    }
-
-    function syncSpeciesOptions(varietySelect, speciesSelect, selectedSpecies) {
-        var selectedVariety = varietySelect.value || "";
-        var speciesOptions = cropSpeciesByVariety[selectedVariety] || [];
-        fillSelectOptions(speciesSelect, speciesOptions, "Seleziona specie", selectedSpecies || "");
-        if (selectedSpecies && speciesOptions.indexOf(selectedSpecies) === -1) {
-            speciesSelect.value = "";
-        }
-    }
-
-    function bindHarvestCropSelectors(row, selectedSpecies) {
-        var varietySelect = row.querySelector('select[name="crop_variety[]"]');
-        var speciesSelect = row.querySelector('select[name="crop_species[]"]');
-        if (!varietySelect || !speciesSelect) {
-            return;
-        }
-
-        fillSelectOptions(varietySelect, cropVarieties, "Seleziona varietà", varietySelect.value || "");
-        syncSpeciesOptions(varietySelect, speciesSelect, selectedSpecies || speciesSelect.value || "");
-
-        varietySelect.addEventListener("change", function () {
-            syncSpeciesOptions(varietySelect, speciesSelect, "");
-        });
     }
 
     function createActionCell() {
@@ -338,9 +269,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (historyType === "trattamenti") {
             row.appendChild(createInputCell("date[]", "", "GG/MM/AAAA"));
-            row.appendChild(createInputCell("water_quantity[]", "", "Quantità acqua"));
             row.appendChild(createInputCell("product_name[]", "", "Prodotto"));
             row.appendChild(createInputCell("product_quantity[]", "", "Quantità prodotto"));
+            row.appendChild(createInputCell("water_quantity[]", "", "Quantità acqua"));
         } else if (historyType === "irrigazione") {
             row.appendChild(createInputCell("date[]", "", "GG/MM/AAAA"));
             row.appendChild(createInputCell("start_time[]", "", "HH:MM"));
@@ -350,14 +281,11 @@ document.addEventListener("DOMContentLoaded", function () {
             row.appendChild(createInputCell("date[]", "", "GG/MM/AAAA"));
             row.appendChild(createInputCell("harvest_quantity[]", "", "Quantità raccolta"));
             row.appendChild(createInputCell("stock_year[]", "", "Anno scorta"));
-            row.appendChild(createSelectCell("crop_variety[]", "Seleziona varietà"));
-            row.appendChild(createSelectCell("crop_species[]", "Seleziona specie"));
+            row.appendChild(createFixedValueCell(plotCropSpecies));
+            row.appendChild(createFixedValueCell(plotCropVariety));
         }
 
         row.appendChild(createActionCell());
-        if (historyType === "raccolta") {
-            bindHarvestCropSelectors(row, "");
-        }
         return row;
     }
 
@@ -392,15 +320,6 @@ document.addEventListener("DOMContentLoaded", function () {
             tbody.appendChild(createEmptyStateRow());
         }
     });
-
-    if (table.dataset.historyType === "raccolta") {
-        table.querySelectorAll("tbody tr").forEach(function (row) {
-            if (!row.classList.contains("empty-state")) {
-                bindHarvestCropSelectors(row);
-            }
-        });
-    }
-
     window.FarmIOTableLock({
         table: "#plot-history-table",
         lockButton: '[data-lock-table="plot-history-table"]',

@@ -20,7 +20,7 @@
 {% elif endpoint == "risorse_macchinari_manutenzioni" %}
     {% set parent_label = "Macchinari" %}
     {% set parent_url = url_for("risorse_macchinari") %}
-{% elif endpoint in ["punto_vendita_online", "punto_vendita_fisico"] %}
+{% elif endpoint in ["punto_vendita_gestione", "punto_vendita_online", "punto_vendita_fisico"] %}
     {% set parent_label = "Punto Vendita" %}
     {% set parent_url = url_for("punto_vendita") %}
 {% elif endpoint == "punto_vendita_online_cliente" %}

@@ -186,13 +186,13 @@
                             <table class="table table-bordered table-hover align-middle farmio-data-table" id="{{ table_id }}" data-empty-colspan="8" data-row-count="{{ rows|length if rows is defined and rows else 1 }}">
                                 <thead>
                                     <tr>
+                                        <th>Appezzamento <span class="farmio-required-star">*</span></th>
+                                        <th>Descrizione <span class="farmio-required-star">*</span></th>
                                         <th>Inizio <span class="farmio-required-star">*</span></th>
                                         <th>Fine</th>
-                                        <th>Descrizione <span class="farmio-required-star">*</span></th>
                                         <th>Soggetto</th>
                                         <th>Macchinari</th>
                                         <th>Attrezzature</th>
-                                        <th>Appezzamenti <span class="farmio-required-star">*</span></th>
                                         <th class="text-center">Azioni</th>
                                     </tr>
                                 </thead>
@@ -200,13 +200,13 @@
                                     {% if rows is defined and rows %}
                                     {% for row in rows %}
                                     <tr>
+                                        <td class="single-select-cell" data-options-type="plots" data-field-name="plot[]" data-selected-value="{{ row.plot|default('') }}"></td>
+                                        <td><input type="text" class="form-control" name="description[]" value="{{ row.description|default('') }}" placeholder="Descrizione"></td>
                                         <td><input type="text" class="form-control" name="start_at[]" value="{{ row.start_at|default('') }}" placeholder="Inizio"></td>
                                         <td><input type="text" class="form-control" name="end_at[]" value="{{ row.end_at|default('') }}" placeholder="Fine"></td>
-                                        <td><input type="text" class="form-control" name="description[]" value="{{ row.description|default('') }}" placeholder="Descrizione"></td>
                                         <td class="multi-select-cell" data-options-type="subjects" data-field-name="subjects[]" data-selected-values='{{ row.subjects|default([])|tojson }}'></td>
                                         <td class="multi-select-cell" data-options-type="machinery" data-field-name="machinery[]" data-selected-values='{{ row.machinery|default([])|tojson }}'></td>
                                         <td class="multi-select-cell" data-options-type="equipment" data-field-name="equipment[]" data-selected-values='{{ row.equipment|default([])|tojson }}'></td>
-                                        <td class="single-select-cell" data-options-type="plots" data-field-name="plot[]" data-selected-value="{{ row.plot|default('') }}"></td>
                                         <td class="text-center">
                                             <div class="table-actions">
                                                 <button type="button" class="delete-row-button" data-remove-intervention-row title="Rimuovi riga" aria-label="Rimuovi riga">
@@ -218,13 +218,13 @@
                                     {% endfor %}
                                     {% else %}
                                     <tr>
+                                        <td class="single-select-cell" data-options-type="plots" data-field-name="plot[]"></td>
+                                        <td><input type="text" class="form-control" name="description[]" placeholder="Descrizione"></td>
                                         <td><input type="text" class="form-control" name="start_at[]" placeholder="Inizio"></td>
                                         <td><input type="text" class="form-control" name="end_at[]" placeholder="Fine"></td>
-                                        <td><input type="text" class="form-control" name="description[]" placeholder="Descrizione"></td>
                                         <td class="multi-select-cell" data-options-type="subjects" data-field-name="subjects[]"></td>
                                         <td class="multi-select-cell" data-options-type="machinery" data-field-name="machinery[]"></td>
                                         <td class="multi-select-cell" data-options-type="equipment" data-field-name="equipment[]"></td>
-                                        <td class="single-select-cell" data-options-type="plots" data-field-name="plot[]"></td>
                                         <td class="text-center">
                                             <div class="table-actions">
                                                 <button type="button" class="delete-row-button" data-remove-intervention-row title="Rimuovi riga" aria-label="Rimuovi riga">
@@ -480,16 +480,16 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             var row = document.createElement("tr");
+            row.appendChild(createSingleSelectCell("plots", "plot[]"));
+            row.appendChild(createInputCell("Descrizione"));
+            row.lastChild.querySelector("input").name = "description[]";
             row.appendChild(createInputCell("Inizio"));
             row.lastChild.querySelector("input").name = "start_at[]";
             row.appendChild(createInputCell("Fine"));
             row.lastChild.querySelector("input").name = "end_at[]";
-            row.appendChild(createInputCell("Descrizione"));
-            row.lastChild.querySelector("input").name = "description[]";
             row.appendChild(createMultiSelectCell("subjects", "subjects[]"));
             row.appendChild(createMultiSelectCell("machinery", "machinery[]"));
             row.appendChild(createMultiSelectCell("equipment", "equipment[]"));
-            row.appendChild(createSingleSelectCell("plots", "plot[]"));
             row.appendChild(createActionCell());
             tbody.appendChild(row);
 

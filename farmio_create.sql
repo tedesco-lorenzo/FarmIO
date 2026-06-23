@@ -207,11 +207,6 @@ CREATE TABLE PUNTO_VENDITA (
     orari_apertura VARCHAR(100) NULL,
     negozio_fisico BOOLEAN NOT NULL,
     online BOOLEAN NOT NULL,
-    CHECK (
-        (negozio_fisico = 1 AND online = 0)
-        OR
-        (negozio_fisico = 0 AND online = 1)
-    ),
     PRIMARY KEY (partita_iva),
     FOREIGN KEY (email_azienda_agricola) REFERENCES AZIENDA_AGRICOLA(email) ON DELETE CASCADE
 );

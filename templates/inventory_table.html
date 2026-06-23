@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.farmio-price-missing .input-group-text,
+.farmio-price-missing .form-control {
+    border-color: #f6c23e;
+    background-color: #fffaf0;
+}
+
+.farmio-price-missing .form-control {
+    color: #9a6b00;
+    font-weight: 700;
+}
+
+.farmio-price-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.75rem;
+    color: #9a6b00;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div id="wrapper">
+    {% include "partials/_sidebar.html" %}
+
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <h4 class="m-0 text-gray-800">{{ title }}</h4>
+            </nav>
+
+            <div class="container-fluid">
+                {% include "partials/_page_navigation.html" %}
+
+                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                    <div>
+                        <h1 class="h3 mb-1 text-gray-800">{{ title }}</h1>
+                        <p class="mb-0 text-muted">{{ subtitle }}</p>
+                    </div>
+                    <div class="farmio-edit-controls">
+                        <button
+                            class="btn btn-outline-success shadow-sm d-none"
+                            type="submit"
+                            form="inventory-form"
+                            data-lock-table="inventory-table"
+                            data-submit-before-lock="true"
+                        >
+                            <i class="fas fa-check fa-sm mr-1"></i>
+                            Conferma tabella
+                        </button>
+                        <button class="btn btn-outline-warning shadow-sm" type="button" data-unlock-table="inventory-table">
+                            <i class="fas fa-pen fa-sm mr-1"></i>
+                            Modifica tabella
+                        </button>
+                    </div>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} mb-4 farmio-auto-dismiss-alert" role="alert" data-dismiss-ms="4000">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div class="card shadow mb-4 farmio-card">
+                    <div class="card-header py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-success">{{ table_heading or title }}</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <form method="post" action="{{ save_action }}" id="inventory-form">
+                                <table class="table table-bordered table-hover align-middle farmio-data-table" id="inventory-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Specie</th>
+                                            <th>Varietà</th>
+                                            <th>Anno</th>
+                                            <th>Quantità</th>
+                                            <th>Prezzo <span class="farmio-required-star">*</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if inventory_records %}
+                                            {% for record in inventory_records %}
+                                            <tr>
+                                                <td>
+                                                    {{ record.crop_species }}
+                                                    <input type="hidden" name="crop_species[]" value="{{ record.crop_species }}">
+                                                </td>
+                                                <td>
+                                                    {{ record.crop_variety }}
+                                                    <input type="hidden" name="crop_variety[]" value="{{ record.crop_variety }}">
+                                                </td>
+                                                <td>
+                                                    {{ record.year }}
+                                                    <input type="hidden" name="year[]" value="{{ record.year }}">
+                                                </td>
+                                                <td>{{ record.quantity }}</td>
+                                                <td>
+                                                    <div class="input-group{% if record.price in ['0', '0.0', '0.00', '0,00'] %} farmio-price-missing{% endif %}">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">€</span>
+                                                        </div>
+                                                        <input type="text" class="form-control" name="price[]" value="{{ record.price }}" data-price-input="true">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted py-4">
+                                                    Nessuna scorta disponibile.
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </form>
+                        </div>
+                        {% if inventory_records %}
+                        <div class="farmio-price-note">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Le righe evidenziate in giallo hanno prezzo a zero e sono da completare.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>FarmIO © 2026 by Compagnia del Grifone SRL</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var tableLock = window.FarmIOTableLock({
+        table: "#inventory-table",
+        lockButton: '[data-lock-table="inventory-table"]',
+        unlockButton: '[data-unlock-table="inventory-table"]',
+        bindLockButton: false
+    });
+
+    var priceInputs = document.querySelectorAll('#inventory-table [data-price-input="true"]');
+
+    function syncInventoryReadonlyState() {
+        var isLocked = tableLock ? tableLock.isLocked() : true;
+        priceInputs.forEach(function (input) {
+            input.readOnly = isLocked;
+        });
+    }
+
+    syncInventoryReadonlyState();
+
+    document.querySelector('[data-unlock-table="inventory-table"]').addEventListener("click", function () {
+        window.setTimeout(syncInventoryReadonlyState, 0);
+    });
+
+    document.querySelector('[data-lock-table="inventory-table"]').addEventListener("click", function () {
+        window.setTimeout(syncInventoryReadonlyState, 0);
+    });
+});
+</script>
+{% endblock %}

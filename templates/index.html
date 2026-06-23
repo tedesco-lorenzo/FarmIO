@@ -5,101 +5,108 @@
 {% block extra_head %}
 <style>
     .dashboard-hero {
-        background: linear-gradient(135deg, rgba(28, 200, 138, 0.14), rgba(78, 115, 223, 0.12));
-        border-radius: 1.25rem;
+        background: linear-gradient(135deg, rgba(28, 200, 138, 0.12), rgba(78, 115, 223, 0.08));
         border: 1px solid rgba(81, 115, 106, 0.08);
+        border-radius: 1.25rem;
     }
 
-    .dashboard-stat {
-        border-left-width: 0.35rem;
-        border-left-style: solid;
+    .dashboard-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 0.8rem;
+        border-radius: 999px;
+        background: #eef8f3;
+        color: #24654f;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+    .dashboard-stat-card,
+    .dashboard-mini-card,
+    .dashboard-link-card,
+    .dashboard-panel-item {
+        border: 1px solid #edf2ef;
+        border-radius: 1rem;
         transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .dashboard-stat:hover,
-    .dashboard-link:hover {
+    .dashboard-stat-card:hover,
+    .dashboard-link-card:hover,
+    .dashboard-panel-item:hover {
         transform: translateY(-2px);
         box-shadow: 0 1rem 2rem rgba(31, 45, 61, 0.08);
     }
 
-    .dashboard-stat-primary {
-        border-left-color: #4e73df;
-    }
-
-    .dashboard-stat-success {
-        border-left-color: #1cc88a;
-    }
-
-    .dashboard-stat-info {
-        border-left-color: #36b9cc;
-    }
-
-    .dashboard-stat-warning {
-        border-left-color: #f6c23e;
-    }
-
-    .dashboard-link {
+    .dashboard-stat-link,
+    .dashboard-link-card {
         display: block;
-        height: 100%;
-        color: inherit;
-        text-decoration: none;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    .dashboard-link:hover {
         color: inherit;
         text-decoration: none;
     }
 
-    .dashboard-link-icon {
-        width: 3rem;
-        height: 3rem;
+    .dashboard-stat-link:hover,
+    .dashboard-link-card:hover {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .dashboard-icon {
+        width: 2.9rem;
+        height: 2.9rem;
         border-radius: 0.9rem;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         background: rgba(28, 200, 138, 0.12);
-        color: #2d7f63;
-        font-size: 1.15rem;
+        color: #1f7d5d;
+        font-size: 1.05rem;
     }
 
-    .terrain-chip,
-    .section-chip {
+    .dashboard-link-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .dashboard-hero-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        max-width: 260px;
+        margin-left: auto;
+    }
+
+    .dashboard-hero-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .dashboard-panel-item + .dashboard-panel-item {
+        margin-top: 0.85rem;
+    }
+
+    .dashboard-tag {
         display: inline-flex;
         align-items: center;
-        justify-content: center;
-        min-width: 2rem;
-        height: 2rem;
-        padding: 0 0.6rem;
+        padding: 0.3rem 0.65rem;
         border-radius: 999px;
-        background: #eef8f3;
-        color: #2d7f63;
-        font-size: 0.8rem;
+        background: #f4fbf7;
+        color: #2b745c;
+        font-size: 0.78rem;
         font-weight: 700;
         text-decoration: none;
     }
 
-    .terrain-chip:hover,
-    .section-chip:hover {
-        background: #dff3e9;
-        color: #205a47;
+    .dashboard-tag:hover {
+        color: #205543;
+        background: #e7f6ee;
         text-decoration: none;
     }
 
-    .dashboard-list {
-        display: grid;
-        gap: 0.85rem;
-    }
-
-    .dashboard-list-item {
-        border: 1px solid #edf2ef;
-        border-radius: 1rem;
-        padding: 1rem 1rem 0.9rem;
-        background: #fff;
-    }
-
-    .dashboard-order-table td,
-    .dashboard-order-table th {
+    .dashboard-table td,
+    .dashboard-table th {
         white-space: nowrap;
         vertical-align: middle;
     }
@@ -108,91 +115,64 @@
 
 {% block body %}
 <div id="wrapper">
-
     {% include "partials/_sidebar.html" %}
 
     <div id="content-wrapper" class="d-flex flex-column">
-
         <div id="content">
             <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow-sm">
                 <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                     <i class="fa fa-bars"></i>
                 </button>
-
                 <h4 class="m-0 text-gray-800">Dashboard</h4>
-
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item d-flex align-items-center text-muted small">
-                        {{ session.get("user_name", "Utente") }}
-                    </li>
-                </ul>
             </nav>
 
             <div class="container-fluid">
-                <div class="farmio-card shadow-sm p-4 dashboard-hero mb-4">
+                <div class="dashboard-hero shadow-sm p-4 mb-4">
                     <div class="row align-items-center">
                         <div class="col-lg-8">
-                            <span class="badge badge-success px-3 py-2 mb-3">Panoramica gestionale</span>
-                            <h1 class="h3 text-gray-900 mb-2">Benvenuto in FarmIO</h1>
+                            <h1 class="h3 text-gray-900 mb-2">{{ dashboard.company_name }}</h1>
+                            <p class="text-muted mb-3">{{ dashboard.company_email }}</p>
                             <div class="d-flex flex-wrap">
-                                <a class="btn btn-success btn-sm mr-2 mb-2" href="{{ url_for('interventi_operativi') }}">
-                                    <i class="fas fa-tools fa-sm mr-1"></i>
-                                    Apri interventi
-                                </a>
-                                <a class="btn btn-outline-success btn-sm mr-2 mb-2" href="{{ url_for('appezzamenti') }}">
-                                    <i class="fas fa-map-marked-alt fa-sm mr-1"></i>
-                                    Vai agli appezzamenti
-                                </a>
-                                <a class="btn btn-outline-secondary btn-sm mb-2" href="{{ url_for('punto_vendita_online') }}">
-                                    <i class="fas fa-store fa-sm mr-1"></i>
-                                    Vai al punto vendita
-                                </a>
+                                {% for item in dashboard.status_items %}
+                                <span class="dashboard-chip mr-2 mb-2">
+                                    {{ item.label }}: {{ item.value }}
+                                </span>
+                                {% endfor %}
                             </div>
                         </div>
                         <div class="col-lg-4 mt-4 mt-lg-0">
-                            <div class="farmio-card bg-white shadow-sm p-3">
-                                <div class="text-xs text-uppercase text-success font-weight-bold mb-2">Stato rapido</div>
-                                <div class="dashboard-list">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted small">Terreni attivi</span>
-                                        <span class="section-chip">{{ dashboard.summary_cards[0].value }}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted small">Soggetti registrati</span>
-                                        <span class="section-chip">{{ dashboard.summary_cards[1].value }}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted small">Ordini consultabili</span>
-                                        <span class="section-chip">{{ dashboard.summary_cards[2].value }}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted small">Risorse disponibili</span>
-                                        <span class="section-chip">{{ dashboard.summary_cards[3].value }}</span>
-                                    </div>
-                                </div>
+                            <div class="dashboard-hero-actions">
+                            <a class="btn btn-success btn-sm" href="{{ url_for('appezzamenti') }}">
+                                <i class="fas fa-map-marked-alt fa-sm mr-1"></i>
+                                Apri appezzamenti
+                            </a>
+                            <a class="btn btn-outline-success btn-sm" href="{{ url_for('interventi_operativi') }}">
+                                <i class="fas fa-clipboard-list fa-sm mr-1"></i>
+                                Apri interventi
+                            </a>
+                            <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('punto_vendita_gestione') }}">
+                                <i class="fas fa-store fa-sm mr-1"></i>
+                                Punti vendita
+                            </a>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="row">
-                    {% for card in dashboard.summary_cards %}
+                    {% for card in dashboard.main_cards %}
                     <div class="col-xl-3 col-md-6 mb-4">
-                        <a class="dashboard-link" href="{{ card.href }}">
-                            <div class="card dashboard-stat dashboard-stat-{{ card.color }} shadow-sm h-100 py-2">
+                        <a class="dashboard-stat-link" href="{{ card.href }}">
+                            <div class="card shadow-sm h-100 dashboard-stat-card border-0">
                                 <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-{{ card.color }} text-uppercase mb-1">
-                                                {{ card.title }}
-                                            </div>
-                                            <div class="h4 mb-1 font-weight-bold text-gray-800">{{ card.value }}</div>
-                                            <div class="small text-muted">{{ card.note }}</div>
+                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                        <div class="dashboard-icon">
+                                            <i class="fas {{ card.icon }}"></i>
                                         </div>
-                                        <div class="col-auto">
-                                            <i class="fas {{ card.icon }} fa-2x text-gray-300"></i>
-                                        </div>
+                                        <span class="text-xs font-weight-bold text-uppercase text-{{ card.color }}">{{ card.title }}</span>
                                     </div>
+                                    <div class="h3 mb-1 font-weight-bold text-gray-800">{{ card.value }}</div>
+                                    <div class="small text-muted">{{ card.note }}</div>
                                 </div>
                             </div>
                         </a>
@@ -201,29 +181,112 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-xl-7 mb-4">
+                    {% for card in dashboard.secondary_cards %}
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <a class="dashboard-stat-link" href="{{ card.href }}">
+                            <div class="card shadow-sm h-100 dashboard-mini-card border-0">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="text-sm font-weight-bold text-gray-800">{{ card.title }}</div>
+                                        <i class="fas {{ card.icon }} text-gray-300"></i>
+                                    </div>
+                                    <div class="h4 mb-1 font-weight-bold text-success">{{ card.value }}</div>
+                                    <div class="small text-muted">{{ card.note }}</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-8 mb-4">
                         <div class="card farmio-card shadow-sm h-100">
                             <div class="card-header bg-white border-0 pt-4 pb-0">
-                                <h6 class="m-0 font-weight-bold text-success">Accesso rapido</h6>
-                                <p class="text-muted small mb-0 mt-1">Collegamenti diretti alle aree principali del gestionale.</p>
+                                <h6 class="m-0 font-weight-bold text-success">Aree principali</h6>
                             </div>
                             <div class="card-body pt-3">
-                                <div class="row">
+                                <div class="dashboard-link-grid">
                                     {% for link in dashboard.quick_links %}
-                                    <div class="col-md-6 mb-3">
-                                        <a class="dashboard-link" href="{{ link.href }}">
-                                            <div class="dashboard-list-item h-100">
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <div class="dashboard-link-icon mr-3">
-                                                        <i class="fas {{ link.icon }}"></i>
-                                                    </div>
-                                                    <h6 class="mb-0 font-weight-bold text-gray-800">{{ link.title }}</h6>
-                                                </div>
-                                                <p class="small text-muted mb-0">{{ link.description }}</p>
+                                    <a class="dashboard-link-card p-3" href="{{ link.href }}">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="dashboard-icon mr-3">
+                                                <i class="fas {{ link.icon }}"></i>
                                             </div>
-                                        </a>
-                                    </div>
+                                            <div class="font-weight-bold text-gray-800">{{ link.title }}</div>
+                                        </div>
+                                        <div class="small text-muted">{{ link.description }}</div>
+                                    </a>
                                     {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 mb-4">
+                        <div class="card farmio-card shadow-sm h-100">
+                            <div class="card-header bg-white border-0 pt-4 pb-0">
+                                <h6 class="m-0 font-weight-bold text-success">Da controllare</h6>
+                            </div>
+                            <div class="card-body pt-3">
+                                <div class="dashboard-panel-item p-3">
+                                    <div class="small text-muted mb-1">Scorte con prezzo da completare</div>
+                                    <div class="h4 mb-0 font-weight-bold text-warning">{{ dashboard.pending_inventory_count }}</div>
+                                </div>
+                                <div class="dashboard-panel-item p-3">
+                                    <div class="small text-muted mb-1">Ordini online / fisici</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ dashboard.main_cards[2].note }}</div>
+                                </div>
+                                <div class="dashboard-panel-item p-3">
+                                    <div class="small text-muted mb-1">Interventi operativi registrati</div>
+                                    <div class="h4 mb-0 font-weight-bold text-info">{{ dashboard.secondary_cards[1].value }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-7 mb-4">
+                        <div class="card farmio-card shadow-sm h-100">
+                            <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                                <h6 class="m-0 font-weight-bold text-success">Ordini recenti</h6>
+                                <a class="btn btn-sm btn-outline-success" href="{{ url_for('punto_vendita_online') }}">Apri ordini</a>
+                            </div>
+                            <div class="card-body pt-3">
+                                <div class="table-responsive">
+                                    <table class="table dashboard-table farmio-data-table mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Punto vendita</th>
+                                                <th>Cliente</th>
+                                                <th>Canale</th>
+                                                <th>Totale</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for order in dashboard.recent_orders %}
+                                            <tr>
+                                                <td>{{ order.point_name }}</td>
+                                                <td>{{ order.client_name }} {{ order.client_surname }}</td>
+                                                <td>{{ order.channel_label }}</td>
+                                                <td>{{ order.total }}</td>
+                                                <td class="text-right">
+                                                    {% if order.channel_label == "Online" %}
+                                                    <a class="btn btn-sm btn-outline-success" href="{{ url_for('punto_vendita_online_ordine', order_id=order.order_id) }}">Apri</a>
+                                                    {% else %}
+                                                    <a class="btn btn-sm btn-outline-success" href="{{ url_for('punto_vendita_fisico_ordine', order_id=order.order_id) }}">Apri</a>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% else %}
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted py-4">Nessun ordine disponibile.</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -231,37 +294,38 @@
 
                     <div class="col-xl-5 mb-4">
                         <div class="card farmio-card shadow-sm h-100">
-                            <div class="card-header bg-white border-0 pt-4 pb-0">
+                            <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
                                 <h6 class="m-0 font-weight-bold text-success">Scorte rapide</h6>
-                                <p class="text-muted small mb-0 mt-1">Anteprima sintetica delle righe presenti in magazzino.</p>
+                                <a class="btn btn-sm btn-outline-success" href="{{ url_for('scorte') }}">Apri scorte</a>
                             </div>
                             <div class="card-body pt-3">
                                 <div class="table-responsive">
-                                    <table class="table farmio-data-table mb-0">
+                                    <table class="table dashboard-table farmio-data-table mb-0">
                                         <thead>
                                             <tr>
-                                                <th>Anno</th>
-                                                <th>Quantità</th>
-                                                <th>Prezzo</th>
-                                                <th>Varietà</th>
                                                 <th>Specie</th>
+                                                <th>Varietà</th>
+                                                <th>Anno</th>
+                                                <th>Prezzo</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {% for row in dashboard.inventory_preview %}
+                                            {% for record in dashboard.inventory_preview %}
                                             <tr>
-                                                {% for value in row %}
-                                                <td>{{ value }}</td>
-                                                {% endfor %}
+                                                <td>{{ record.crop_species }}</td>
+                                                <td>{{ record.crop_variety }}</td>
+                                                <td>{{ record.year }}</td>
+                                                <td class="{% if record.price in ['0', '0.0', '0.00'] %}text-warning font-weight-bold{% endif %}">
+                                                    € {{ record.price }}
+                                                </td>
+                                            </tr>
+                                            {% else %}
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted py-4">Nessuna scorta disponibile.</td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>
                                     </table>
-                                </div>
-                                <div class="mt-3">
-                                    <a class="btn btn-sm btn-outline-success" href="{{ url_for('scorte') }}">
-                                        Apri scorte
-                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -271,77 +335,67 @@
                 <div class="row">
                     <div class="col-xl-6 mb-4">
                         <div class="card farmio-card shadow-sm h-100">
-                            <div class="card-header bg-white border-0 pt-4 pb-0">
+                            <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
                                 <h6 class="m-0 font-weight-bold text-success">Terreni e appezzamenti</h6>
-                                <p class="text-muted small mb-0 mt-1">Ogni terreno mostra subito gli appezzamenti collegati.</p>
+                                <a class="btn btn-sm btn-outline-success" href="{{ url_for('proprieta_terreni') }}">Apri terreni</a>
                             </div>
                             <div class="card-body pt-3">
-                                <div class="dashboard-list">
-                                    {% for terrain in dashboard.terrain_cards %}
-                                    <div class="dashboard-list-item">
-                                        <div class="d-flex justify-content-between align-items-start flex-wrap mb-2">
-                                            <div class="mr-3">
-                                                <h6 class="mb-1 font-weight-bold text-gray-800">{{ terrain.name }}</h6>
-                                                <div class="small text-muted">{{ terrain.type }} · {{ terrain.surface }}</div>
-                                            </div>
-                                            <a class="btn btn-sm btn-outline-success mt-2 mt-sm-0" href="{{ url_for('proprieta_terreni') }}">
-                                                Apri terreni
-                                            </a>
-                                        </div>
-                                        <div class="d-flex flex-wrap">
-                                            {% if terrain.plot_ids %}
-                                                {% for plot_id in terrain.plot_ids %}
-                                                <a class="terrain-chip mr-2 mb-2" href="{{ url_for('appezzamenti', focus=plot_id) }}">
-                                                    App. {{ plot_id }}
-                                                </a>
-                                                {% endfor %}
-                                            {% else %}
-                                                <span class="small text-muted">Nessun appezzamento collegato.</span>
-                                            {% endif %}
+                                {% for terrain in dashboard.terrain_cards %}
+                                <div class="dashboard-panel-item p-3">
+                                    <div class="d-flex justify-content-between align-items-start flex-wrap mb-2">
+                                        <div class="mr-2">
+                                            <div class="font-weight-bold text-gray-800">{{ terrain.name }}</div>
+                                            <div class="small text-muted">{{ terrain.type }} · {{ terrain.surface }}</div>
                                         </div>
                                     </div>
-                                    {% endfor %}
+                                    <div class="d-flex flex-wrap">
+                                        {% for plot_id in terrain.plot_ids %}
+                                        <a class="dashboard-tag mr-2 mb-2" href="{{ url_for('appezzamenti', focus=plot_id) }}">App. {{ plot_id }}</a>
+                                        {% else %}
+                                        <span class="small text-muted">Nessun appezzamento collegato.</span>
+                                        {% endfor %}
+                                    </div>
                                 </div>
+                                {% else %}
+                                <div class="text-muted">Nessun terreno disponibile.</div>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
 
                     <div class="col-xl-6 mb-4">
                         <div class="card farmio-card shadow-sm h-100">
-                            <div class="card-header bg-white border-0 pt-4 pb-0">
-                                <h6 class="m-0 font-weight-bold text-success">Ordini recenti</h6>
-                                <p class="text-muted small mb-0 mt-1">Accesso veloce agli ultimi ordini online e fisici.</p>
+                            <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                                <h6 class="m-0 font-weight-bold text-success">Archivio colture e interventi</h6>
+                                <a class="btn btn-sm btn-outline-success" href="{{ url_for('colture') }}">Apri colture</a>
                             </div>
                             <div class="card-body pt-3">
-                                <div class="table-responsive">
-                                    <table class="table farmio-data-table dashboard-order-table mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>Canale</th>
-                                                <th>Ordine</th>
-                                                <th>Cliente</th>
-                                                <th>Data</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for order in dashboard.recent_orders %}
-                                            <tr>
-                                                <td>{{ order.channel_label }}</td>
-                                                <td>{{ order.order_id }}</td>
-                                                <td>{{ order.client_name }} {{ order.client_surname }}</td>
-                                                <td>{{ order.date }}</td>
-                                                <td class="text-right">
-                                                    {% if order.channel_label == "Online" %}
-                                                    <a class="btn btn-sm btn-outline-success" href="{{ url_for('punto_vendita_online_ordine', order_id=order.order_id) }}">Apri</a>
-                                                    {% else %}
-                                                    <a class="btn btn-sm btn-outline-success" href="{{ url_for('punto_vendita_fisico_ordine', order_id=order.order_id) }}">Apri</a>
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
+                                <div class="mb-4">
+                                    <div class="small text-muted mb-2">Archivio colture consultabile</div>
+                                    <div class="d-flex flex-wrap">
+                                        {% for crop in dashboard.crop_preview %}
+                                        <span class="dashboard-tag mr-2 mb-2">{{ crop[0] }} · {{ crop[1] }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="small text-muted mb-2">Interventi recenti</div>
+                                    {% for intervention in dashboard.recent_interventions %}
+                                    <div class="dashboard-panel-item p-3">
+                                        <div class="d-flex justify-content-between align-items-start flex-wrap">
+                                            <div class="mr-2">
+                                                <div class="font-weight-bold text-gray-800">{{ intervention.description }}</div>
+                                                <div class="small text-muted">
+                                                    Appezzamento {{ intervention.plot }} · {{ intervention.start_at }}
+                                                </div>
+                                            </div>
+                                            <a class="btn btn-sm btn-outline-success mt-2 mt-sm-0" href="{{ url_for('interventi_operativi') }}">Apri</a>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="text-muted">Nessun intervento disponibile.</div>
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
@@ -357,7 +411,6 @@
                 </div>
             </div>
         </footer>
-
     </div>
 </div>
 
